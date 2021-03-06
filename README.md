@@ -1,4 +1,4 @@
-<p align="center"<a href="https://tickitz-film.netlify.app/"><img src="https://i.ibb.co/tzSzq4x/Tickitz-2.png" alt="Tickitz-2" border="0" /></a></p>
+<p align="center"<a href="https://tickitz-film.netlify.app/" target="_blank"><img src="https://i.ibb.co/tzSzq4x/Tickitz-2.png" alt="Tickitz-2" border="0" /></a></p>
 
 ## About Tickitz Film
 
