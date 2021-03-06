@@ -33,6 +33,12 @@ app.use('/cities', citiesRouter)
 app.use('/cinemas', cinemasRouter)
 app.use('/tickets', ticketsRouter)
 app.use('/transactions', transactionsRouter)
+app.use((req, res) => {
+  res.status(404).send({
+    status: false,
+    message: 'Page not found'
+  })
+})
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`)
