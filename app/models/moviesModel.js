@@ -1,13 +1,28 @@
 const connection = require('../configs/dbConfig');
 
-exports.getAllMovies = () => {
+exports.getAllMovies = (queryPage, queryPerPage) => {
 	return new Promise((resolve, reject) => {
-		connection.query('SELECT * FROM movies', (err, result) => {
-			if (!err) {
-				resolve(result);
-			} else {
+		connection.query("SELECT COUNT(*) AS totalData FROM movies", (err, result) => {
+			let totalData;
+			let page;
+			let perPage;
+			let totalPage;
+			if (err) {
 				reject(err);
+			} else {
+				totalData = result[0].totalData;
+				page = queryPage ? parseInt(queryPage) : 1;
+				perPage = queryPerPage ? parseInt(queryPerPage) : 5;
+				totalPage = Math.ceil(totalData / perPage);
 			}
+			let firstData = (perPage * page) - perPage;
+			connection.query("SELECT * FROM movies LIMIT ?, ?", [firstData, perPage], (err, result) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve([totalData, totalPage, result, page, perPage]);
+				}
+			});
 		});
 	});
 };

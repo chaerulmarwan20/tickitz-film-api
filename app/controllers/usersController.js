@@ -2,16 +2,30 @@ const usersModel = require('../models/usersModel');
 const helper = require('../helpers/printHelper');
 
 exports.findAll = (req, res) => {
-	usersModel.getAllUsers()
-		.then((result) => {
-			if (result < 1) {
-				throw new Error('Users not found');
-			}
-			helper.print(res, 200, 'Find all users successfully', result);
-		})
-		.catch((err) => {
-			helper.print(res, 500, err.message, {});
-		});
+	const keyword = req.query.keyword;
+	if (keyword) {
+		usersModel.searchUsers(`%${keyword}%`)
+			.then((result) => {
+				if (result < 1) {
+					throw new Error('Users not found');
+				}
+				helper.print(res, 200, 'Users was found', result);
+			})
+			.catch((err) => {
+				helper.print(res, 500, err.message, {});
+			});
+	} else {
+		usersModel.getAllUsers()
+			.then((result) => {
+				if (result < 1) {
+					throw new Error('Users not found');
+				}
+				helper.print(res, 200, 'Find all users successfully', result);
+			})
+			.catch((err) => {
+				helper.print(res, 500, err.message, {});
+			});
+	}
 };
 
 exports.findOne = (req, res) => {
@@ -20,6 +34,7 @@ exports.findOne = (req, res) => {
 	const checkId = /^[0-9]+$/;
 	if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;
@@ -42,6 +57,7 @@ exports.create = (req, res) => {
 
 	if (!fullName || !phoneNumber || !username || !email || !password) {
 		res.status(400).send({
+			status: false,
 			message: "Content cannot be empty"
 		});
 		return;
@@ -77,11 +93,13 @@ exports.update = (req, res) => {
 
 	if (!fullName || !phoneNumber || !username || !email || !password) {
 		res.status(400).send({
+			status: false,
 			message: "Content cannot be empty"
 		});
 		return;
 	} else if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;
@@ -114,6 +132,7 @@ exports.delete = (req, res) => {
 	const checkId = /^[0-9]+$/;
 	if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;

@@ -71,3 +71,15 @@ exports.deleteCities = (id) => {
 		});
 	});
 };
+
+exports.searchCities = (keyword) => {
+	return new Promise((resolve, reject) => {
+		connection.query('SELECT * FROM cities WHERE name LIKE ?', keyword, (err, result) => {
+			if (!err) {
+				resolve(result);
+			} else {
+				reject(err);
+			}
+		});
+	});
+};

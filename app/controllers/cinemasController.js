@@ -2,16 +2,30 @@ const cinemasModel = require('../models/cinemasModel');
 const helper = require('../helpers/printHelper');
 
 exports.findAll = (req, res) => {
-	cinemasModel.getAllCinemas()
-		.then((result) => {
-			if (result < 1) {
-				throw new Error('Cinemas not found');
-			}
-			helper.print(res, 200, 'Find all cinemas successfully', result);
-		})
-		.catch((err) => {
-			helper.print(res, 500, err.message, {});
-		});
+	const keyword = req.query.keyword;
+	if (keyword) {
+		cinemasModel.searchCinemas(`%${keyword}%`)
+			.then((result) => {
+				if (result < 1) {
+					throw new Error('Cinemas not found');
+				}
+				helper.print(res, 200, 'Cinemas was found', result);
+			})
+			.catch((err) => {
+				helper.print(res, 500, err.message, {});
+			});
+	} else {
+		cinemasModel.getAllCinemas()
+			.then((result) => {
+				if (result < 1) {
+					throw new Error('Cinemas not found');
+				}
+				helper.print(res, 200, 'Find all cinemas successfully', result);
+			})
+			.catch((err) => {
+				helper.print(res, 500, err.message, {});
+			});
+	}
 };
 
 exports.findOne = (req, res) => {
@@ -20,6 +34,7 @@ exports.findOne = (req, res) => {
 	const checkId = /^[0-9]+$/;
 	if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;
@@ -37,14 +52,28 @@ exports.findOne = (req, res) => {
 		});
 };
 
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
 	const {name, address, idCity} = req.body;
 
 	if (!name || !address || !idCity) {
 		res.status(400).send({
+			status: false,
 			message: "Content cannot be empty"
 		});
 		return;
+	}
+
+	try {
+		const getCity = await cinemasModel.getCity(idCity);
+		if (getCity < 1) {
+			res.status(400).send({
+				status: false,
+				message: "Provide an id city!"
+			});
+			return;
+		}
+	} catch (err) {
+		helper.print(res, 500, err.message, {});
 	}
 
 	const data = {
@@ -67,7 +96,7 @@ exports.create = (req, res) => {
 		});
 };
 
-exports.update = (req, res) => {
+exports.update = async (req, res) => {
 	const id = req.params.id;
 	const checkId = /^[0-9]+$/;
 
@@ -75,6 +104,7 @@ exports.update = (req, res) => {
 
 	if (!name || !address || !idCity) {
 		res.status(400).send({
+			status: false,
 			message: "Content cannot be empty"
 		});
 		return;
@@ -83,6 +113,19 @@ exports.update = (req, res) => {
 			message: "Provide an id!"
 		});
 		return;
+	}
+
+	try {
+		const getCity = await cinemasModel.getCity(idCity);
+		if (getCity < 1) {
+			res.status(400).send({
+				status: false,
+				message: "Provide an id city!"
+			});
+			return;
+		}
+	} catch (err) {
+		helper.print(res, 500, err.message, {});
 	}
 
 	const data = {
@@ -110,6 +153,7 @@ exports.delete = (req, res) => {
 	const checkId = /^[0-9]+$/;
 	if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;

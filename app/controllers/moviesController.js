@@ -2,12 +2,26 @@ const moviesModel = require('../models/moviesModel');
 const helper = require('../helpers/printHelper');
 
 exports.findAll = (req, res) => {
-	moviesModel.getAllMovies()
-		.then((result) => {
+	const queryPage = req.query.page;
+	const queryPerPage = req.query.perPage;
+	moviesModel.getAllMovies(queryPage, queryPerPage)
+		.then(([totalData, totalPage, result, page, perPage]) => {
 			if (result < 1) {
-				throw new Error('Movies not found');
+				res.status(500).json({
+					status: false,
+					message: 'Movies not found',
+					data: result,
+				});
 			}
-			helper.print(res, 200, 'Find all movies successfully', result);
+			res.status(200).json({
+				status: true,
+				message: 'Find movies successfully',
+				totalData,
+				totalPage,
+				data: result,
+				currentPage: page,
+				perPage
+			});
 		})
 		.catch((err) => {
 			helper.print(res, 500, err.message, {});
@@ -33,6 +47,7 @@ exports.findOne = (req, res) => {
 	const checkId = /^[0-9]+$/;
 	if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;
@@ -55,6 +70,7 @@ exports.create = (req, res) => {
 
 	if (!title || !genre || !duration || !director || !cast || !synopsis || !rating) {
 		res.status(400).send({
+			status: false,
 			message: "Content cannot be empty"
 		});
 		return;
@@ -93,6 +109,7 @@ exports.update = (req, res) => {
 
 	if (!title || !genre || !duration || !director || !cast || !synopsis || !rating) {
 		res.status(400).send({
+			status: false,
 			message: "Content cannot be empty"
 		});
 		return;
@@ -133,6 +150,7 @@ exports.delete = (req, res) => {
 	const checkId = /^[0-9]+$/;
 	if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;

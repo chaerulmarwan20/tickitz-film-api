@@ -71,3 +71,15 @@ exports.deleteUsers = (id) => {
 		});
 	});
 };
+
+exports.searchUsers = (keyword) => {
+	return new Promise((resolve, reject) => {
+		connection.query('SELECT * FROM users WHERE fullName LIKE ? OR username LIKE ? OR email LIKE ?', [keyword, keyword, keyword], (err, result) => {
+			if (!err) {
+				resolve(result);
+			} else {
+				reject(err);
+			}
+		});
+	});
+};

@@ -71,3 +71,27 @@ exports.deleteCinemas = (id) => {
 		});
 	});
 };
+
+exports.searchCinemas = (keyword) => {
+	return new Promise((resolve, reject) => {
+		connection.query('SELECT cinemas.id, cinemas.name, cinemas.address, cities.name AS city, cinemas.createdAt, cinemas.updatedAt FROM cinemas INNER JOIN cities ON cinemas.idCity = cities.id WHERE cinemas.name LIKE ? OR cities.name LIKE ?', [keyword, keyword], (err, result) => {
+			if (!err) {
+				resolve(result);
+			} else {
+				reject(err);
+			}
+		});
+	});
+};
+
+exports.getCity = (idCity) => {
+	return new Promise((resolve, reject) => {
+		connection.query('SELECT cities.id FROM cities WHERE id = ?', idCity, (err, result) => {
+			if (!err) {
+				resolve(result);
+			} else {
+				reject(err);
+			}
+		});
+	});
+}

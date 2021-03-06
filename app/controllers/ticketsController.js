@@ -2,16 +2,30 @@ const ticketsModel = require('../models/ticketsModel');
 const helper = require('../helpers/printHelper');
 
 exports.findAll = (req, res) => {
-	ticketsModel.getAllTickets()
-		.then((result) => {
-			if (result < 1) {
-				throw new Error('Tickets not found');
-			}
-			helper.print(res, 200, 'Find all tickets successfully', result);
-		})
-		.catch((err) => {
-			helper.print(res, 500, err.message, {});
-		});
+	const keyword = req.query.keyword;
+	if (keyword) {
+		ticketsModel.searchMoviesTickets(`%${keyword}%`)
+			.then((result) => {
+				if (result < 1) {
+					throw new Error('Tickets movies not available');
+				}
+				helper.print(res, 200, 'Tickets movies available', result);
+			})
+			.catch((err) => {
+				helper.print(res, 500, err.message, {});
+			});
+	} else {
+		ticketsModel.getAllTickets()
+			.then((result) => {
+				if (result < 1) {
+					throw new Error('Tickets not found');
+				}
+				helper.print(res, 200, 'Find all tickets successfully', result);
+			})
+			.catch((err) => {
+				helper.print(res, 500, err.message, {});
+			});
+	}
 };
 
 exports.findOne = (req, res) => {
@@ -20,6 +34,7 @@ exports.findOne = (req, res) => {
 	const checkId = /^[0-9]+$/;
 	if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;
@@ -37,18 +52,35 @@ exports.findOne = (req, res) => {
 		});
 };
 
-exports.create = (req, res) => {
-	const {movieTitle,day, row, seat, price, qty, idMovie, idCinema} = req.body;
+exports.create = async (req, res) => {
+	const {day, row, seat, price, qty, idMovie, idCinema} = req.body;
 
-	if (!movieTitle || !day || !row || !seat || !price || !qty || !idMovie || !idCinema) {
+	if (!day || !row || !seat || !price || !qty || !idMovie || !idCinema) {
 		res.status(400).send({
+			status: false,
 			message: "Content cannot be empty"
 		});
 		return;
 	}
 
+	let titleMovie;
+	try {
+		const getTitle = await ticketsModel.getMovieTitle(idMovie);
+		const getCinema = await ticketsModel.getCinema(idCinema);
+		if (getTitle < 1 || getCinema < 1) {
+			res.status(400).send({
+				status: false,
+				message: "Provide an id movie and cinema!"
+			});
+			return;
+		}
+		titleMovie = getTitle[0].title;
+	} catch (err) {
+		helper.print(res, 500, err.message, {});
+	}
+
 	const data = {
-		movieTitle,
+		movieTitle: titleMovie,
 		day,
 		row,
 		seat,
@@ -74,26 +106,44 @@ exports.create = (req, res) => {
 		});
 };
 
-exports.update = (req, res) => {
+exports.update = async (req, res) => {
 	const id = req.params.id;
 	const checkId = /^[0-9]+$/;
 
-	const {movieTitle, day, row, seat, price, qty, idMovie, idCinema} = req.body;
+	const {day, row, seat, price, qty, idMovie, idCinema} = req.body;
 
-	if (!movieTitle || !day || !row || !seat || !price || !qty || !idMovie || !idCinema) {
+	if (!day || !row || !seat || !price || !qty || !idMovie || !idCinema) {
 		res.status(400).send({
+			status: false,
 			message: "Content cannot be empty"
 		});
 		return;
 	} else if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;
 	}
 
+	let titleMovie;
+	try {
+		const getTitle = await ticketsModel.getMovieTitle(idMovie);
+		const getCinema = await ticketsModel.getCinema(idCinema);
+		if (getTitle < 1 || getCinema < 1) {
+			res.status(400).send({
+				status: false,
+				message: "Provide an id movie and cinema!"
+			});
+			return;
+		}
+		titleMovie = getTitle[0].title;
+	} catch (err) {
+		helper.print(res, 500, err.message, {});
+	}
+
 	const data = {
-		movieTitle,
+		movieTitle: titleMovie,
 		day,
 		row,
 		seat,
@@ -122,6 +172,7 @@ exports.delete = (req, res) => {
 	const checkId = /^[0-9]+$/;
 	if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;
@@ -137,4 +188,17 @@ exports.delete = (req, res) => {
 		.catch((err) => {
 			helper.print(res, 500, err.message, {});
 		});
-}
+};
+
+exports.sort = (req, res) => {
+	ticketsModel.sortByDate()
+		.then((result) => {
+			if (result < 1) {
+				throw new Error('Tickets not found');
+			}
+			helper.print(res, 200, 'Sort by date tickets successfully', result);
+		})
+		.catch((err) => {
+			helper.print(res, 500, err.message, {});
+		});
+};

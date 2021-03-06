@@ -2,16 +2,30 @@ const citiesModel = require('../models/citiesModel');
 const helper = require('../helpers/printHelper');
 
 exports.findAll = (req, res) => {
-	citiesModel.getAllCities()
-		.then((result) => {
-			if (result < 1) {
-				throw new Error('Cities not found');
-			}
-			helper.print(res, 200, 'Find all cities successfully', result);
-		})
-		.catch((err) => {
-			helper.print(res, 500, err.message, {});
-		});
+	const keyword = req.query.keyword;
+	if (keyword) {
+		citiesModel.searchCities(`%${keyword}%`)
+			.then((result) => {
+				if (result < 1) {
+					throw new Error('Cities not found');
+				}
+				helper.print(res, 200, 'Cities was found', result);
+			})
+			.catch((err) => {
+				helper.print(res, 500, err.message, {});
+			});
+	} else {
+		citiesModel.getAllCities()
+			.then((result) => {
+				if (result < 1) {
+					throw new Error('Cities not found');
+				}
+				helper.print(res, 200, 'Find all cities successfully', result);
+			})
+			.catch((err) => {
+				helper.print(res, 500, err.message, {});
+			});
+	}
 };
 
 exports.findOne = (req, res) => {
@@ -20,6 +34,7 @@ exports.findOne = (req, res) => {
 	const checkId = /^[0-9]+$/;
 	if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;
@@ -42,6 +57,7 @@ exports.create = (req, res) => {
 
 	if (!name) {
 		res.status(400).send({
+			status: false,
 			message: "Content cannot be empty"
 		});
 		return;
@@ -73,11 +89,13 @@ exports.update = (req, res) => {
 
 	if (!name) {
 		res.status(400).send({
+			status: false,
 			message: "Content cannot be empty"
 		});
 		return;
 	} else if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;
@@ -106,6 +124,7 @@ exports.delete = (req, res) => {
 	const checkId = /^[0-9]+$/;
 	if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;

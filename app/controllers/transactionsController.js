@@ -2,12 +2,39 @@ const transactionsModel = require('../models/transactionsModel');
 const helper = require('../helpers/printHelper');
 
 exports.findAll = (req, res) => {
-	transactionsModel.getAllTransactions()
+	const keyword = req.query.keyword;
+	if (keyword) {
+		transactionsModel.searchTransactions(`%${keyword}%`)
+			.then((result) => {
+				if (result < 1) {
+					throw new Error('Transactions not found');
+				}
+				helper.print(res, 200, 'Transactions was found', result);
+			})
+			.catch((err) => {
+				helper.print(res, 500, err.message, {});
+			});
+	} else {
+		transactionsModel.getAllTransactions()
+			.then((result) => {
+				if (result < 1) {
+					throw new Error('Transactions not found');
+				}
+				helper.print(res, 200, 'Find all transactions successfully', result);
+			})
+			.catch((err) => {
+				helper.print(res, 500, err.message, {});
+			});
+	}
+};
+
+exports.findAllSuccessed = (req, res) => {
+	transactionsModel.getTransactionsSuccessed()
 		.then((result) => {
 			if (result < 1) {
-				throw new Error('Transactions not found');
+				throw new Error('Transactions successed not found');
 			}
-			helper.print(res, 200, 'Find all transactions successfully', result);
+			helper.print(res, 200, 'Find all transactions successed successfully', result);
 		})
 		.catch((err) => {
 			helper.print(res, 500, err.message, {});
@@ -20,6 +47,7 @@ exports.findOne = (req, res) => {
 	const checkId = /^[0-9]+$/;
 	if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;
@@ -37,14 +65,29 @@ exports.findOne = (req, res) => {
 		});
 };
 
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
 	const {paymentMethod, idUser, idTicket, qty, total} = req.body;
 
 	if (!paymentMethod || !idUser || !idTicket || !qty || !total) {
 		res.status(400).send({
+			status: false,
 			message: "Content cannot be empty"
 		});
 		return;
+	}
+
+	try {
+		const getUser = await transactionsModel.getUser(idUser);
+		const getTicket = await transactionsModel.getTicket(idTicket);
+		if (getTicket < 1 || getUser < 1) {
+			res.status(400).send({
+				status: false,
+				message: "Provide an id user and ticket!"
+			});
+			return;
+		}
+	} catch (err) {
+		helper.print(res, 500, err.message, {});
 	}
 
 	const data = {
@@ -71,7 +114,7 @@ exports.create = (req, res) => {
 		});
 };
 
-exports.update = (req, res) => {
+exports.update = async (req, res) => {
 	const id = req.params.id;
 	const checkId = /^[0-9]+$/;
 
@@ -79,14 +122,30 @@ exports.update = (req, res) => {
 
 	if (!paymentMethod || !idUser || !idTicket || !qty || !total || !status) {
 		res.status(400).send({
+			status: false,
 			message: "Content cannot be empty"
 		});
 		return;
 	} else if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;
+	}
+
+	try {
+		const getUser = await transactionsModel.getUser(idUser);
+		const getTicket = await transactionsModel.getTicket(idTicket);
+		if (getTicket < 1 || getUser < 1) {
+			res.status(400).send({
+				status: false,
+				message: "Provide an id user and ticket!"
+			});
+			return;
+		}
+	} catch (err) {
+		helper.print(res, 500, err.message, {});
 	}
 
 	const data = {
@@ -95,7 +154,7 @@ exports.update = (req, res) => {
 		idTicket,
 		qty,
 		total,
-		status,
+		status
 	}
 
 	transactionsModel.updateTransactions(id, data)
@@ -117,6 +176,7 @@ exports.delete = (req, res) => {
 	const checkId = /^[0-9]+$/;
 	if (id.match(checkId) == null) {
 		res.status(400).send({
+			status: false,
 			message: "Provide an id!"
 		});
 		return;
@@ -132,4 +192,17 @@ exports.delete = (req, res) => {
 		.catch((err) => {
 			helper.print(res, 500, err.message, {});
 		});
-}
+};
+
+exports.sort = (req, res) => {
+	transactionsModel.sortByDate()
+		.then((result) => {
+			if (result < 1) {
+				throw new Error('Transactions not found');
+			}
+			helper.print(res, 200, 'Sort by date transactions successfully', result);
+		})
+		.catch((err) => {
+			helper.print(res, 500, err.message, {});
+		});
+};
