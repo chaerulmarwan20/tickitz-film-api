@@ -1,208 +1,208 @@
-const transactionsModel = require('../models/transactionsModel');
-const helper = require('../helpers/printHelper');
+const transactionsModel = require('../models/transactionsModel')
+const helper = require('../helpers/printHelper')
 
 exports.findAll = (req, res) => {
-	const keyword = req.query.keyword;
-	if (keyword) {
-		transactionsModel.searchTransactions(`%${keyword}%`)
-			.then((result) => {
-				if (result < 1) {
-					throw new Error('Transactions not found');
-				}
-				helper.print(res, 200, 'Transactions was found', result);
-			})
-			.catch((err) => {
-				helper.print(res, 500, err.message, {});
-			});
-	} else {
-		transactionsModel.getAllTransactions()
-			.then((result) => {
-				if (result < 1) {
-					throw new Error('Transactions not found');
-				}
-				helper.print(res, 200, 'Find all transactions successfully', result);
-			})
-			.catch((err) => {
-				helper.print(res, 500, err.message, {});
-			});
-	}
-};
+  const keyword = req.query.keyword
+  if (keyword) {
+    transactionsModel.searchTransactions(`%${keyword}%`)
+      .then((result) => {
+        if (result < 1) {
+          throw new Error('Transactions not found')
+        }
+        helper.print(res, 200, 'Transactions was found', result)
+      })
+      .catch((err) => {
+        helper.print(res, 500, err.message, {})
+      })
+  } else {
+    transactionsModel.getAllTransactions()
+      .then((result) => {
+        if (result < 1) {
+          throw new Error('Transactions not found')
+        }
+        helper.print(res, 200, 'Find all transactions successfully', result)
+      })
+      .catch((err) => {
+        helper.print(res, 500, err.message, {})
+      })
+  }
+}
 
 exports.findAllSuccessed = (req, res) => {
-	transactionsModel.getTransactionsSuccessed()
-		.then((result) => {
-			if (result < 1) {
-				throw new Error('Transactions successed not found');
-			}
-			helper.print(res, 200, 'Find all transactions successed successfully', result);
-		})
-		.catch((err) => {
-			helper.print(res, 500, err.message, {});
-		});
-};
+  transactionsModel.getTransactionsSuccessed()
+    .then((result) => {
+      if (result < 1) {
+        throw new Error('Transactions successed not found')
+      }
+      helper.print(res, 200, 'Find all transactions successed successfully', result)
+    })
+    .catch((err) => {
+      helper.print(res, 500, err.message, {})
+    })
+}
 
 exports.findOne = (req, res) => {
-	const id = req.params.id;
+  const id = req.params.id
 
-	const checkId = /^[0-9]+$/;
-	if (id.match(checkId) == null) {
-		res.status(400).send({
-			status: false,
-			message: "Provide an id!"
-		});
-		return;
-	}
+  const checkId = /^[0-9]+$/
+  if (id.match(checkId) == null) {
+    res.status(400).send({
+      status: false,
+      message: 'Provide an id!'
+    })
+    return
+  }
 
-	transactionsModel.getTransactionsById(id)
-		.then((result) => {
-			if (result < 1) {
-				throw new Error(`Error find one transactions with id = ${id}`);
-			}
-			helper.print(res, 200, 'Find one transactions successfully', result);
-		})
-		.catch((err) => {
-			helper.print(res, 500, err.message, {});
-		});
-};
+  transactionsModel.getTransactionsById(id)
+    .then((result) => {
+      if (result < 1) {
+        throw new Error(`Error find one transactions with id = ${id}`)
+      }
+      helper.print(res, 200, 'Find one transactions successfully', result)
+    })
+    .catch((err) => {
+      helper.print(res, 500, err.message, {})
+    })
+}
 
 exports.create = async (req, res) => {
-	const {paymentMethod, idUser, idTicket, qty, total} = req.body;
+  const { paymentMethod, idUser, idTicket, qty, total } = req.body
 
-	if (!paymentMethod || !idUser || !idTicket || !qty || !total) {
-		res.status(400).send({
-			status: false,
-			message: "Content cannot be empty"
-		});
-		return;
-	}
+  if (!paymentMethod || !idUser || !idTicket || !qty || !total) {
+    res.status(400).send({
+      status: false,
+      message: 'Content cannot be empty'
+    })
+    return
+  }
 
-	try {
-		const getUser = await transactionsModel.getUser(idUser);
-		const getTicket = await transactionsModel.getTicket(idTicket);
-		if (getTicket < 1 || getUser < 1) {
-			res.status(400).send({
-				status: false,
-				message: "Provide an id user and ticket!"
-			});
-			return;
-		}
-	} catch (err) {
-		helper.print(res, 500, err.message, {});
-	}
+  try {
+    const getUser = await transactionsModel.getUser(idUser)
+    const getTicket = await transactionsModel.getTicket(idTicket)
+    if (getTicket < 1 || getUser < 1) {
+      res.status(400).send({
+        status: false,
+        message: 'Provide an id user and ticket!'
+      })
+      return
+    }
+  } catch (err) {
+    helper.print(res, 500, err.message, {})
+  }
 
-	const data = {
-		date: new Date(),
-		paymentMethod,
-		idUser,
-		idTicket,
-		qty,
-		total,
-		status: 'PENDING',
-		createdAt: new Date(),
-		updatedAt: new Date()
-	}
+  const data = {
+    date: new Date(),
+    paymentMethod,
+    idUser,
+    idTicket,
+    qty,
+    total,
+    status: 'PENDING',
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
 
-	transactionsModel.createTransactions(data)
-		.then((result) => {
-			if (result.affectedRows == 0) {
-				throw new Error(`Error creating transactions`);
-			}
-			helper.print(res, 200, 'New transactions has been created', result);
-		})
-		.catch((err) => {
-			helper.print(res, 500, err.message, {});
-		});
-};
+  transactionsModel.createTransactions(data)
+    .then((result) => {
+      if (result.affectedRows === 0) {
+        throw new Error('Error creating transactions')
+      }
+      helper.print(res, 200, 'New transactions has been created', result)
+    })
+    .catch((err) => {
+      helper.print(res, 500, err.message, {})
+    })
+}
 
 exports.update = async (req, res) => {
-	const id = req.params.id;
-	const checkId = /^[0-9]+$/;
+  const id = req.params.id
+  const checkId = /^[0-9]+$/
 
-	const {paymentMethod, idUser, idTicket, qty, total, status} = req.body;
+  const { paymentMethod, idUser, idTicket, qty, total, status } = req.body
 
-	if (!paymentMethod || !idUser || !idTicket || !qty || !total || !status) {
-		res.status(400).send({
-			status: false,
-			message: "Content cannot be empty"
-		});
-		return;
-	} else if (id.match(checkId) == null) {
-		res.status(400).send({
-			status: false,
-			message: "Provide an id!"
-		});
-		return;
-	}
+  if (!paymentMethod || !idUser || !idTicket || !qty || !total || !status) {
+    res.status(400).send({
+      status: false,
+      message: 'Content cannot be empty'
+    })
+    return
+  } else if (id.match(checkId) == null) {
+    res.status(400).send({
+      status: false,
+      message: 'Provide an id!'
+    })
+    return
+  }
 
-	try {
-		const getUser = await transactionsModel.getUser(idUser);
-		const getTicket = await transactionsModel.getTicket(idTicket);
-		if (getTicket < 1 || getUser < 1) {
-			res.status(400).send({
-				status: false,
-				message: "Provide an id user and ticket!"
-			});
-			return;
-		}
-	} catch (err) {
-		helper.print(res, 500, err.message, {});
-	}
+  try {
+    const getUser = await transactionsModel.getUser(idUser)
+    const getTicket = await transactionsModel.getTicket(idTicket)
+    if (getTicket < 1 || getUser < 1) {
+      res.status(400).send({
+        status: false,
+        message: 'Provide an id user and ticket!'
+      })
+      return
+    }
+  } catch (err) {
+    helper.print(res, 500, err.message, {})
+  }
 
-	const data = {
-		paymentMethod,
-		idUser,
-		idTicket,
-		qty,
-		total,
-		status
-	}
+  const data = {
+    paymentMethod,
+    idUser,
+    idTicket,
+    qty,
+    total,
+    status
+  }
 
-	transactionsModel.updateTransactions(id, data)
-		.then((result) => {
-			if (result == 0) {
-				throw new Error(`Cannot update transactions with id = ${id}`);
-			} else {
-				helper.print(res, 200, 'Transactions has been updated', result);
-			}
-		})
-		.catch((err) => {
-			helper.print(res, 500, err.message, {});
-		});
-};
+  transactionsModel.updateTransactions(id, data)
+    .then((result) => {
+      if (result === 0) {
+        throw new Error(`Cannot update transactions with id = ${id}`)
+      } else {
+        helper.print(res, 200, 'Transactions has been updated', result)
+      }
+    })
+    .catch((err) => {
+      helper.print(res, 500, err.message, {})
+    })
+}
 
 exports.delete = (req, res) => {
-	const id = req.params.id;
+  const id = req.params.id
 
-	const checkId = /^[0-9]+$/;
-	if (id.match(checkId) == null) {
-		res.status(400).send({
-			status: false,
-			message: "Provide an id!"
-		});
-		return;
-	}
+  const checkId = /^[0-9]+$/
+  if (id.match(checkId) == null) {
+    res.status(400).send({
+      status: false,
+      message: 'Provide an id!'
+    })
+    return
+  }
 
-	transactionsModel.deleteTransactions(id)
-		.then((result) => {
-			if (result.affectedRows == 0) {
-				throw new Error(`Cannot delete transactions with id = ${id}`);
-			}
-			helper.print(res, 200, 'Transactions has been deleted', {});
-		})
-		.catch((err) => {
-			helper.print(res, 500, err.message, {});
-		});
-};
+  transactionsModel.deleteTransactions(id)
+    .then((result) => {
+      if (result.affectedRows === 0) {
+        throw new Error(`Cannot delete transactions with id = ${id}`)
+      }
+      helper.print(res, 200, 'Transactions has been deleted', {})
+    })
+    .catch((err) => {
+      helper.print(res, 500, err.message, {})
+    })
+}
 
 exports.sort = (req, res) => {
-	transactionsModel.sortByDate()
-		.then((result) => {
-			if (result < 1) {
-				throw new Error('Transactions not found');
-			}
-			helper.print(res, 200, 'Sort by date transactions successfully', result);
-		})
-		.catch((err) => {
-			helper.print(res, 500, err.message, {});
-		});
-};
+  transactionsModel.sortByDate()
+    .then((result) => {
+      if (result < 1) {
+        throw new Error('Transactions not found')
+      }
+      helper.print(res, 200, 'Sort by date transactions successfully', result)
+    })
+    .catch((err) => {
+      helper.print(res, 500, err.message, {})
+    })
+}
