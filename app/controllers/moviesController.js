@@ -2,16 +2,13 @@ const moviesModel = require('../models/moviesModel');
 const helper = require('../helpers/printHelper');
 
 exports.findAll = (req, res) => {
+	const keyword = req.query.keyword ? req.query.keyword : null;
 	const queryPage = req.query.page;
 	const queryPerPage = req.query.perPage;
-	moviesModel.getAllMovies(queryPage, queryPerPage)
+	moviesModel.getAllMovies(queryPage, queryPerPage, keyword)
 		.then(([totalData, totalPage, result, page, perPage]) => {
 			if (result < 1) {
-				res.status(500).json({
-					status: false,
-					message: 'Movies not found',
-					data: result,
-				});
+				throw new Error('Movies not found');
 			}
 			res.status(200).json({
 				status: true,
