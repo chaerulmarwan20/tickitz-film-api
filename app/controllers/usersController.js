@@ -2,30 +2,27 @@ const usersModel = require('../models/usersModel')
 const helper = require('../helpers/printHelper')
 
 exports.findAll = (req, res) => {
-  const keyword = req.query.keyword
-  if (keyword) {
-    usersModel.searchUsers(`%${keyword}%`)
-      .then((result) => {
-        if (result < 1) {
-          throw new Error('Users not found')
-        }
-        helper.print(res, 200, 'Users was found', result)
+  const keyword = req.query.keyword ? req.query.keyword : null
+  const queryPage = req.query.page
+  const queryPerPage = req.query.perPage
+  usersModel.getAllUsers(queryPage, queryPerPage, keyword)
+    .then(([totalData, totalPage, result, page, perPage]) => {
+      if (result < 1) {
+        throw new Error('Users not found')
+      }
+      res.status(200).json({
+        status: true,
+        message: 'Find users successfully',
+        totalData,
+        totalPage,
+        data: result,
+        currentPage: page,
+        perPage
       })
-      .catch((err) => {
-        helper.print(res, 500, err.message, {})
-      })
-  } else {
-    usersModel.getAllUsers()
-      .then((result) => {
-        if (result < 1) {
-          throw new Error('Users not found')
-        }
-        helper.print(res, 200, 'Find all users successfully', result)
-      })
-      .catch((err) => {
-        helper.print(res, 500, err.message, {})
-      })
-  }
+    })
+    .catch((err) => {
+      helper.print(res, 500, err.message, {})
+    })
 }
 
 exports.findOne = (req, res) => {

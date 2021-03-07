@@ -9,10 +9,7 @@ exports.getAllMovies = (queryPage, queryPerPage, keyword) => {
       queryLimit = 'SELECT * FROM movies WHERE title LIKE ? LIMIT ?, ?'
     }
     connection.query(queryCount, `%${keyword}%`, (err, result) => {
-      let totalData
-      let page
-      let perPage
-      let totalPage
+      let totalData, page, perPage, totalPage
       if (err) {
         reject(err)
       } else {
@@ -33,14 +30,26 @@ exports.getAllMovies = (queryPage, queryPerPage, keyword) => {
   })
 }
 
-exports.getMoviesRealesed = () => {
+exports.getMoviesRealesed = (queryPage, queryPerPage) => {
   return new Promise((resolve, reject) => {
-    connection.query('SELECT * FROM movies WHERE realesed = true', (err, result) => {
-      if (!err) {
-        resolve(result)
-      } else {
+    connection.query('SELECT COUNT(*) AS totalData FROM movies WHERE realesed = true', (err, result) => {
+      let totalData, page, perPage, totalPage
+      if (err) {
         reject(err)
+      } else {
+        totalData = result[0].totalData
+        page = queryPage ? parseInt(queryPage) : 1
+        perPage = queryPerPage ? parseInt(queryPerPage) : 5
+        totalPage = Math.ceil(totalData / perPage)
       }
+      const firstData = (perPage * page) - perPage
+      connection.query('SELECT * FROM movies WHERE realesed = true LIMIT ?, ?', [firstData, perPage], (err, result) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve([totalData, totalPage, result, page, perPage])
+        }
+      })
     })
   })
 }

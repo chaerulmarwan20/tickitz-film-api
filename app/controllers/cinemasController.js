@@ -2,30 +2,27 @@ const cinemasModel = require('../models/cinemasModel')
 const helper = require('../helpers/printHelper')
 
 exports.findAll = (req, res) => {
-  const keyword = req.query.keyword
-  if (keyword) {
-    cinemasModel.searchCinemas(`%${keyword}%`)
-      .then((result) => {
-        if (result < 1) {
-          throw new Error('Cinemas not found')
-        }
-        helper.print(res, 200, 'Cinemas was found', result)
+  const keyword = req.query.keyword ? req.query.keyword : null
+  const queryPage = req.query.page
+  const queryPerPage = req.query.perPage
+  cinemasModel.getAllCinemas(queryPage, queryPerPage, keyword)
+    .then(([totalData, totalPage, result, page, perPage]) => {
+      if (result < 1) {
+        throw new Error('Cinemas not found')
+      }
+      res.status(200).json({
+        status: true,
+        message: 'Find cinemas successfully',
+        totalData,
+        totalPage,
+        data: result,
+        currentPage: page,
+        perPage
       })
-      .catch((err) => {
-        helper.print(res, 500, err.message, {})
-      })
-  } else {
-    cinemasModel.getAllCinemas()
-      .then((result) => {
-        if (result < 1) {
-          throw new Error('Cinemas not found')
-        }
-        helper.print(res, 200, 'Find all cinemas successfully', result)
-      })
-      .catch((err) => {
-        helper.print(res, 500, err.message, {})
-      })
-  }
+    })
+    .catch((err) => {
+      helper.print(res, 500, err.message, {})
+    })
 }
 
 exports.findOne = (req, res) => {

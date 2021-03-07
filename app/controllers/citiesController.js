@@ -2,30 +2,27 @@ const citiesModel = require('../models/citiesModel')
 const helper = require('../helpers/printHelper')
 
 exports.findAll = (req, res) => {
-  const keyword = req.query.keyword
-  if (keyword) {
-    citiesModel.searchCities(`%${keyword}%`)
-      .then((result) => {
-        if (result < 1) {
-          throw new Error('Cities not found')
-        }
-        helper.print(res, 200, 'Cities was found', result)
+  const keyword = req.query.keyword ? req.query.keyword : null
+  const queryPage = req.query.page
+  const queryPerPage = req.query.perPage
+  citiesModel.getAllCities(queryPage, queryPerPage, keyword)
+    .then(([totalData, totalPage, result, page, perPage]) => {
+      if (result < 1) {
+        throw new Error('Cities not found')
+      }
+      res.status(200).json({
+        status: true,
+        message: 'Find cities successfully',
+        totalData,
+        totalPage,
+        data: result,
+        currentPage: page,
+        perPage
       })
-      .catch((err) => {
-        helper.print(res, 500, err.message, {})
-      })
-  } else {
-    citiesModel.getAllCities()
-      .then((result) => {
-        if (result < 1) {
-          throw new Error('Cities not found')
-        }
-        helper.print(res, 200, 'Find all cities successfully', result)
-      })
-      .catch((err) => {
-        helper.print(res, 500, err.message, {})
-      })
-  }
+    })
+    .catch((err) => {
+      helper.print(res, 500, err.message, {})
+    })
 }
 
 exports.findOne = (req, res) => {

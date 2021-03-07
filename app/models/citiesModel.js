@@ -1,13 +1,34 @@
 const connection = require('../configs/dbConfig')
 
-exports.getAllCities = () => {
+exports.getAllCities = (queryPage, queryPerPage, keyword) => {
   return new Promise((resolve, reject) => {
-    connection.query('SELECT * FROM cities', (err, result) => {
-      if (!err) {
-        resolve(result)
-      } else {
+    let queryCount = 'SELECT COUNT(*) AS totalData FROM cities'
+    let queryLimit = 'SELECT * FROM cities LIMIT ?, ?'
+    if (keyword != null) {
+      queryCount = 'SELECT COUNT(*) AS totalData FROM cities WHERE name LIKE ? '
+      queryLimit = 'SELECT * FROM cities WHERE name LIKE ? LIMIT ?, ?'
+    }
+    connection.query(queryCount, `%${keyword}%`, (err, result) => {
+      let totalData
+      let page
+      let perPage
+      let totalPage
+      if (err) {
         reject(err)
+      } else {
+        totalData = result[0].totalData
+        page = queryPage ? parseInt(queryPage) : 1
+        perPage = queryPerPage ? parseInt(queryPerPage) : 5
+        totalPage = Math.ceil(totalData / perPage)
       }
+      const firstData = (perPage * page) - perPage
+      connection.query(queryLimit, [keyword != null ? `%${keyword}%` : firstData, keyword != null ? firstData : perPage, perPage], (err, result) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve([totalData, totalPage, result, page, perPage])
+        }
+      })
     })
   })
 }
@@ -63,18 +84,6 @@ exports.updateCities = (id, data) => {
 exports.deleteCities = (id) => {
   return new Promise((resolve, reject) => {
     connection.query('DELETE FROM cities WHERE id = ?', id, (err, result) => {
-      if (!err) {
-        resolve(result)
-      } else {
-        reject(err)
-      }
-    })
-  })
-}
-
-exports.searchCities = (keyword) => {
-  return new Promise((resolve, reject) => {
-    connection.query('SELECT * FROM cities WHERE name LIKE ?', keyword, (err, result) => {
       if (!err) {
         resolve(result)
       } else {

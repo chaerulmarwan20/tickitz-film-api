@@ -2,30 +2,27 @@ const ticketsModel = require('../models/ticketsModel')
 const helper = require('../helpers/printHelper')
 
 exports.findAll = (req, res) => {
-  const keyword = req.query.keyword
-  if (keyword) {
-    ticketsModel.searchMoviesTickets(`%${keyword}%`)
-      .then((result) => {
-        if (result < 1) {
-          throw new Error('Tickets movies not available')
-        }
-        helper.print(res, 200, 'Tickets movies available', result)
+  const keyword = req.query.keyword ? req.query.keyword : null
+  const queryPage = req.query.page
+  const queryPerPage = req.query.perPage
+  ticketsModel.getAllTickets(queryPage, queryPerPage, keyword)
+    .then(([totalData, totalPage, result, page, perPage]) => {
+      if (result < 1) {
+        throw new Error('Tickets not found')
+      }
+      res.status(200).json({
+        status: true,
+        message: 'Find tickets successfully',
+        totalData,
+        totalPage,
+        data: result,
+        currentPage: page,
+        perPage
       })
-      .catch((err) => {
-        helper.print(res, 500, err.message, {})
-      })
-  } else {
-    ticketsModel.getAllTickets()
-      .then((result) => {
-        if (result < 1) {
-          throw new Error('Tickets not found')
-        }
-        helper.print(res, 200, 'Find all tickets successfully', result)
-      })
-      .catch((err) => {
-        helper.print(res, 500, err.message, {})
-      })
-  }
+    })
+    .catch((err) => {
+      helper.print(res, 500, err.message, {})
+    })
 }
 
 exports.findOne = (req, res) => {
@@ -191,12 +188,22 @@ exports.delete = (req, res) => {
 }
 
 exports.sort = (req, res) => {
-  ticketsModel.sortByDate()
-    .then((result) => {
+  const queryPage = req.query.page
+  const queryPerPage = req.query.perPage
+  ticketsModel.sortByDate(queryPage, queryPerPage)
+    .then(([totalData, totalPage, result, page, perPage]) => {
       if (result < 1) {
-        throw new Error('Tickets not found')
+        throw new Error('Sort by date tickets not found')
       }
-      helper.print(res, 200, 'Sort by date tickets successfully', result)
+      res.status(200).json({
+        status: true,
+        message: 'Sort by date tickets successfully',
+        totalData,
+        totalPage,
+        data: result,
+        currentPage: page,
+        perPage
+      })
     })
     .catch((err) => {
       helper.print(res, 500, err.message, {})

@@ -2,39 +2,46 @@ const transactionsModel = require('../models/transactionsModel')
 const helper = require('../helpers/printHelper')
 
 exports.findAll = (req, res) => {
-  const keyword = req.query.keyword
-  if (keyword) {
-    transactionsModel.searchTransactions(`%${keyword}%`)
-      .then((result) => {
-        if (result < 1) {
-          throw new Error('Transactions not found')
-        }
-        helper.print(res, 200, 'Transactions was found', result)
+  const keyword = req.query.keyword ? req.query.keyword : null
+  const queryPage = req.query.page
+  const queryPerPage = req.query.perPage
+  transactionsModel.getAllTransactions(queryPage, queryPerPage, keyword)
+    .then(([totalData, totalPage, result, page, perPage]) => {
+      if (result < 1) {
+        throw new Error('Transactions not found')
+      }
+      res.status(200).json({
+        status: true,
+        message: 'Find transactions successfully',
+        totalData,
+        totalPage,
+        data: result,
+        currentPage: page,
+        perPage
       })
-      .catch((err) => {
-        helper.print(res, 500, err.message, {})
-      })
-  } else {
-    transactionsModel.getAllTransactions()
-      .then((result) => {
-        if (result < 1) {
-          throw new Error('Transactions not found')
-        }
-        helper.print(res, 200, 'Find all transactions successfully', result)
-      })
-      .catch((err) => {
-        helper.print(res, 500, err.message, {})
-      })
-  }
+    })
+    .catch((err) => {
+      helper.print(res, 500, err.message, {})
+    })
 }
 
 exports.findAllSuccessed = (req, res) => {
-  transactionsModel.getTransactionsSuccessed()
-    .then((result) => {
+  const queryPage = req.query.page
+  const queryPerPage = req.query.perPage
+  transactionsModel.getTransactionsSuccessed(queryPage, queryPerPage)
+    .then(([totalData, totalPage, result, page, perPage]) => {
       if (result < 1) {
         throw new Error('Transactions successed not found')
       }
-      helper.print(res, 200, 'Find all transactions successed successfully', result)
+      res.status(200).json({
+        status: true,
+        message: 'Find transactions successed successfully',
+        totalData,
+        totalPage,
+        data: result,
+        currentPage: page,
+        perPage
+      })
     })
     .catch((err) => {
       helper.print(res, 500, err.message, {})
@@ -195,12 +202,22 @@ exports.delete = (req, res) => {
 }
 
 exports.sort = (req, res) => {
-  transactionsModel.sortByDate()
-    .then((result) => {
+  const queryPage = req.query.page
+  const queryPerPage = req.query.perPage
+  transactionsModel.sortByDate(queryPage, queryPerPage)
+    .then(([totalData, totalPage, result, page, perPage]) => {
       if (result < 1) {
-        throw new Error('Transactions not found')
+        throw new Error('Sort by date transactions not found')
       }
-      helper.print(res, 200, 'Sort by date transactions successfully', result)
+      res.status(200).json({
+        status: true,
+        message: 'Sort by date transactions successfully',
+        totalData,
+        totalPage,
+        data: result,
+        currentPage: page,
+        perPage
+      })
     })
     .catch((err) => {
       helper.print(res, 500, err.message, {})

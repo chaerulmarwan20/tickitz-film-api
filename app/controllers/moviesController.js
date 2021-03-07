@@ -26,12 +26,22 @@ exports.findAll = (req, res) => {
 }
 
 exports.findAllRealesed = (req, res) => {
-  moviesModel.getMoviesRealesed()
-    .then((result) => {
+  const queryPage = req.query.page
+  const queryPerPage = req.query.perPage
+  moviesModel.getMoviesRealesed(queryPage, queryPerPage)
+    .then(([totalData, totalPage, result, page, perPage]) => {
       if (result < 1) {
-        throw new Error('Movies released not found')
+        throw new Error('Movies realesed not found')
       }
-      helper.print(res, 200, 'Find all movies realesed successfully', result)
+      res.status(200).json({
+        status: true,
+        message: 'Find movies realesed successfully',
+        totalData,
+        totalPage,
+        data: result,
+        currentPage: page,
+        perPage
+      })
     })
     .catch((err) => {
       helper.print(res, 500, err.message, {})
