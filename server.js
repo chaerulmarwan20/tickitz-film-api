@@ -21,7 +21,7 @@ app.use(express.urlencoded({
 app.use(cors())
 app.use(morgan('dev'))
 
-app.use('/v1', router);
+app.use('/v1', router)
 
 app.use('*', (req, res, next) => {
   const err = new Error('Page not found')
