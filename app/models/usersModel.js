@@ -5,16 +5,13 @@ exports.getAllUsers = (queryPage, queryPerPage, keyword) => {
     let queryCount = 'SELECT COUNT(*) AS totalData FROM users'
     let queryLimit = 'SELECT * FROM users LIMIT ?, ?'
     if (keyword != null) {
-      queryCount = 'SELECT COUNT(*) AS totalData FROM users WHERE fullName LIKE ? OR username LIKE ? OR email LIKE ? '
+      queryCount = 'SELECT COUNT(*) AS totalData FROM users WHERE fullName LIKE ? OR username LIKE ? OR email LIKE ?'
       queryLimit = 'SELECT * FROM users WHERE fullName LIKE ? OR username LIKE ? OR email LIKE ? LIMIT ?, ?'
     }
     connection.query(queryCount, [`%${keyword}%`, `%${keyword}%`, `%${keyword}%`], (err, result) => {
-      let totalData
-      let page
-      let perPage
-      let totalPage
+      let totalData, page, perPage, totalPage
       if (err) {
-        reject(err)
+        reject(new Error('Internal server error'))
       } else {
         totalData = result[0].totalData
         page = queryPage ? parseInt(queryPage) : 1
@@ -24,7 +21,7 @@ exports.getAllUsers = (queryPage, queryPerPage, keyword) => {
       const firstData = (perPage * page) - perPage
       connection.query(queryLimit, [keyword != null ? `%${keyword}%` : firstData, keyword != null ? `%${keyword}%` : perPage, keyword != null ? `%${keyword}%` : firstData, firstData, perPage], (err, result) => {
         if (err) {
-          reject(err)
+          reject(new Error('Internal server error'))
         } else {
           resolve([totalData, totalPage, result, page, perPage])
         }
@@ -39,7 +36,7 @@ exports.getUsersById = (id) => {
       if (!err) {
         resolve(result)
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -53,11 +50,11 @@ exports.createUsers = (data) => {
           if (!err) {
             resolve(result)
           } else {
-            reject(err)
+            reject(new Error('Internal server error'))
           }
         })
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -71,11 +68,11 @@ exports.updateUsers = (id, data) => {
           if (!err) {
             resolve(result)
           } else {
-            reject(err)
+            reject(new Error('Internal server error'))
           }
         })
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -87,7 +84,7 @@ exports.deleteUsers = (id) => {
       if (!err) {
         resolve(result)
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })

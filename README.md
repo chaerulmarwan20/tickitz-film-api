@@ -11,7 +11,6 @@ The tickitz film application is created using how many dependencies, along with 
 - **[Express](https://expressjs.com/)**
 - **[Nodemon](https://nodemon.io/)**
 - **[MySQL2](https://www.npmjs.com/package/mysql2)**
-- **[Body-Parser](https://www.npmjs.com/package/body-parser)**
 - **[Cors](https://www.npmjs.com/package/cors)**
 - **[Standard](https://standardjs.com/)**
 - **[Dotenv](https://www.npmjs.com/package/dotenv)**

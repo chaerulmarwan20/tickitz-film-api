@@ -9,12 +9,9 @@ exports.getAllCities = (queryPage, queryPerPage, keyword) => {
       queryLimit = 'SELECT * FROM cities WHERE name LIKE ? LIMIT ?, ?'
     }
     connection.query(queryCount, `%${keyword}%`, (err, result) => {
-      let totalData
-      let page
-      let perPage
-      let totalPage
+      let totalData, page, perPage, totalPage
       if (err) {
-        reject(err)
+        reject(new Error('Internal server error'))
       } else {
         totalData = result[0].totalData
         page = queryPage ? parseInt(queryPage) : 1
@@ -24,7 +21,7 @@ exports.getAllCities = (queryPage, queryPerPage, keyword) => {
       const firstData = (perPage * page) - perPage
       connection.query(queryLimit, [keyword != null ? `%${keyword}%` : firstData, keyword != null ? firstData : perPage, perPage], (err, result) => {
         if (err) {
-          reject(err)
+          reject(new Error('Internal server error'))
         } else {
           resolve([totalData, totalPage, result, page, perPage])
         }
@@ -39,7 +36,7 @@ exports.getCitiesById = (id) => {
       if (!err) {
         resolve(result)
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -53,11 +50,11 @@ exports.createCities = (data) => {
           if (!err) {
             resolve(result)
           } else {
-            reject(err)
+            reject(new Error('Internal server error'))
           }
         })
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -71,11 +68,11 @@ exports.updateCities = (id, data) => {
           if (!err) {
             resolve(result)
           } else {
-            reject(err)
+            reject(new Error('Internal server error'))
           }
         })
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -87,7 +84,7 @@ exports.deleteCities = (id) => {
       if (!err) {
         resolve(result)
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })

@@ -7,36 +7,31 @@ const port = process.env.PORT
 const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
-const bodyParser = require('body-parser')
 
 // Router
-const moviesRouter = require('./app/routers/moviesRouter')
-const usersRouter = require('./app/routers/usersRouter')
-const citiesRouter = require('./app/routers/citiesRouter')
-const cinemasRouter = require('./app/routers/cinemasRouter')
-const ticketsRouter = require('./app/routers/ticketsRouter')
-const transactionsRouter = require('./app/routers/transactionsRouter')
+const router = require('./app/routers')
 
 const app = express()
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({
+app.use(express.json())
+app.use(express.urlencoded({
   extended: false
 }))
 
 app.use(cors())
 app.use(morgan('dev'))
 
-app.use('/movies', moviesRouter)
-app.use('/users', usersRouter)
-app.use('/cities', citiesRouter)
-app.use('/cinemas', cinemasRouter)
-app.use('/tickets', ticketsRouter)
-app.use('/transactions', transactionsRouter)
-app.use((req, res) => {
+app.use('/v1', router);
+
+app.use('*', (req, res, next) => {
+  const err = new Error('Page not found')
+  next(err)
+})
+
+app.use((err, req, res, next) => {
   res.status(404).send({
     status: false,
-    message: 'Page not found'
+    message: err.message
   })
 })
 

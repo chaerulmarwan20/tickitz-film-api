@@ -9,12 +9,9 @@ exports.getAllCinemas = (queryPage, queryPerPage, keyword) => {
       queryLimit = 'SELECT cinemas.id, cinemas.name, cinemas.address, cities.name AS city, cinemas.createdAt, cinemas.updatedAt FROM cinemas INNER JOIN cities ON cinemas.idCity = cities.id WHERE name LIKE ? LIMIT ?, ?'
     }
     connection.query(queryCount, `%${keyword}%`, (err, result) => {
-      let totalData
-      let page
-      let perPage
-      let totalPage
+      let totalData, page, perPage, totalPage
       if (err) {
-        reject(err)
+        reject(new Error('Internal server error'))
       } else {
         totalData = result[0].totalData
         page = queryPage ? parseInt(queryPage) : 1
@@ -24,7 +21,7 @@ exports.getAllCinemas = (queryPage, queryPerPage, keyword) => {
       const firstData = (perPage * page) - perPage
       connection.query(queryLimit, [keyword != null ? `%${keyword}%` : firstData, keyword != null ? firstData : perPage, perPage], (err, result) => {
         if (err) {
-          reject(err)
+          reject(new Error('Internal server error'))
         } else {
           resolve([totalData, totalPage, result, page, perPage])
         }
@@ -39,7 +36,7 @@ exports.getCinemasById = (id) => {
       if (!err) {
         resolve(result)
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -53,11 +50,11 @@ exports.createCinemas = (data) => {
           if (!err) {
             resolve(result)
           } else {
-            reject(err)
+            reject(new Error('Internal server error'))
           }
         })
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -71,11 +68,11 @@ exports.updateCinemas = (id, data) => {
           if (!err) {
             resolve(result)
           } else {
-            reject(err)
+            reject(new Error('Internal server error'))
           }
         })
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -87,7 +84,7 @@ exports.deleteCinemas = (id) => {
       if (!err) {
         resolve(result)
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -99,7 +96,7 @@ exports.getCity = (idCity) => {
       if (!err) {
         resolve(result)
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })

@@ -11,7 +11,7 @@ exports.getAllMovies = (queryPage, queryPerPage, keyword) => {
     connection.query(queryCount, `%${keyword}%`, (err, result) => {
       let totalData, page, perPage, totalPage
       if (err) {
-        reject(err)
+        reject(new Error('Internal server error'))
       } else {
         totalData = result[0].totalData
         page = queryPage ? parseInt(queryPage) : 1
@@ -21,7 +21,7 @@ exports.getAllMovies = (queryPage, queryPerPage, keyword) => {
       const firstData = (perPage * page) - perPage
       connection.query(queryLimit, [keyword != null ? `%${keyword}%` : firstData, keyword != null ? firstData : perPage, perPage], (err, result) => {
         if (err) {
-          reject(err)
+          reject(new Error('Internal server error'))
         } else {
           resolve([totalData, totalPage, result, page, perPage])
         }
@@ -35,7 +35,7 @@ exports.getMoviesRealesed = (queryPage, queryPerPage) => {
     connection.query('SELECT COUNT(*) AS totalData FROM movies WHERE realesed = true', (err, result) => {
       let totalData, page, perPage, totalPage
       if (err) {
-        reject(err)
+        reject(new Error('Internal server error'))
       } else {
         totalData = result[0].totalData
         page = queryPage ? parseInt(queryPage) : 1
@@ -45,7 +45,7 @@ exports.getMoviesRealesed = (queryPage, queryPerPage) => {
       const firstData = (perPage * page) - perPage
       connection.query('SELECT * FROM movies WHERE realesed = true LIMIT ?, ?', [firstData, perPage], (err, result) => {
         if (err) {
-          reject(err)
+          reject(new Error('Internal server error'))
         } else {
           resolve([totalData, totalPage, result, page, perPage])
         }
@@ -60,7 +60,7 @@ exports.getMoviesById = (id) => {
       if (!err) {
         resolve(result)
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -74,11 +74,11 @@ exports.createMovies = (data) => {
           if (!err) {
             resolve(result)
           } else {
-            reject(err)
+            reject(new Error('Internal server error'))
           }
         })
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -92,11 +92,11 @@ exports.updateMovies = (id, data) => {
           if (!err) {
             resolve(result)
           } else {
-            reject(err)
+            reject(new Error('Internal server error'))
           }
         })
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -108,7 +108,7 @@ exports.deleteMovies = (id) => {
       if (!err) {
         resolve(result)
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })

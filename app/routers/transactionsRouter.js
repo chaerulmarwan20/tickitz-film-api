@@ -6,6 +6,7 @@ router
   .get('/', transactionsController.findAll)
   .get('/sort', transactionsController.sort)
   .get('/successed', transactionsController.findAllSuccessed)
+  .get('/search', transactionsController.search)
   .get('/:id', transactionsController.findOne)
   .post('/', transactionsController.create)
   .put('/:id', transactionsController.update)

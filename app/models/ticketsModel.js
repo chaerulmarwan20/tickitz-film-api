@@ -11,7 +11,7 @@ exports.getAllTickets = (queryPage, queryPerPage, keyword) => {
     connection.query(queryCount, `%${keyword}%`, (err, result) => {
       let totalData, page, perPage, totalPage
       if (err) {
-        reject(err)
+        reject(new Error('Internal server error'))
       } else {
         totalData = result[0].totalData
         page = queryPage ? parseInt(queryPage) : 1
@@ -21,7 +21,7 @@ exports.getAllTickets = (queryPage, queryPerPage, keyword) => {
       const firstData = (perPage * page) - perPage
       connection.query(queryLimit, [keyword != null ? `%${keyword}%` : firstData, keyword != null ? firstData : perPage, perPage], (err, result) => {
         if (err) {
-          reject(err)
+          reject(new Error('Internal server error'))
         } else {
           resolve([totalData, totalPage, result, page, perPage])
         }
@@ -36,7 +36,7 @@ exports.getTicketsById = (id) => {
       if (!err) {
         resolve(result)
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -50,11 +50,11 @@ exports.createTickets = (data) => {
           if (!err) {
             resolve(result)
           } else {
-            reject(err)
+            reject(new Error('Internal server error'))
           }
         })
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -68,11 +68,11 @@ exports.updateTickets = (id, data) => {
           if (!err) {
             resolve(result)
           } else {
-            reject(err)
+            reject(new Error('Internal server error'))
           }
         })
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -84,7 +84,7 @@ exports.deleteTickets = (id) => {
       if (!err) {
         resolve(result)
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -95,7 +95,7 @@ exports.sortByDate = (queryPage, queryPerPage) => {
     connection.query('SELECT COUNT(*) AS totalData FROM tickets', (err, result) => {
       let totalData, page, perPage, totalPage
       if (err) {
-        reject(err)
+        reject(new Error('Internal server error'))
       } else {
         totalData = result[0].totalData
         page = queryPage ? parseInt(queryPage) : 1
@@ -105,7 +105,7 @@ exports.sortByDate = (queryPage, queryPerPage) => {
       const firstData = (perPage * page) - perPage
       connection.query('SELECT tickets.id, movies.title AS movies, cinemas.name AS cinema, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.qty, tickets.createdAt, tickets.updatedAt FROM ((tickets INNER JOIN movies ON tickets.idMovie = movies.id) INNER JOIN cinemas ON tickets.idCinema = cinemas.id) ORDER BY tickets.createdAt DESC LIMIT ?, ?', [firstData, perPage], (err, result) => {
         if (err) {
-          reject(err)
+          reject(new Error('Internal server error'))
         } else {
           resolve([totalData, totalPage, result, page, perPage])
         }
@@ -120,7 +120,7 @@ exports.getMovieTitle = (idMovie) => {
       if (!err) {
         resolve(result)
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
@@ -132,7 +132,7 @@ exports.getCinema = (idCinema) => {
       if (!err) {
         resolve(result)
       } else {
-        reject(err)
+        reject(new Error('Internal server error'))
       }
     })
   })
