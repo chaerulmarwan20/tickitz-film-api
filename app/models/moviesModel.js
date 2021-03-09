@@ -1,14 +1,8 @@
 const connection = require('../configs/dbConfig')
 
-exports.getAllMovies = (queryPage, queryPerPage, keyword) => {
+exports.getAllMovies = (queryPage, queryPerPage, keyword, sortBy, order) => {
   return new Promise((resolve, reject) => {
-    let queryCount = 'SELECT COUNT(*) AS totalData FROM movies'
-    let queryLimit = 'SELECT * FROM movies LIMIT ?, ?'
-    if (keyword != null) {
-      queryCount = 'SELECT COUNT(*) AS totalData FROM movies WHERE title LIKE ? '
-      queryLimit = 'SELECT * FROM movies WHERE title LIKE ? LIMIT ?, ?'
-    }
-    connection.query(queryCount, `%${keyword}%`, (err, result) => {
+    connection.query('SELECT COUNT(*) AS totalData FROM movies WHERE title LIKE ?', `%${keyword}%`, (err, result) => {
       let totalData, page, perPage, totalPage
       if (err) {
         reject(new Error('Internal server error'))
@@ -19,7 +13,7 @@ exports.getAllMovies = (queryPage, queryPerPage, keyword) => {
         totalPage = Math.ceil(totalData / perPage)
       }
       const firstData = (perPage * page) - perPage
-      connection.query(queryLimit, [keyword != null ? `%${keyword}%` : firstData, keyword != null ? firstData : perPage, perPage], (err, result) => {
+      connection.query(`SELECT * FROM movies WHERE title LIKE ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`, [`%${keyword}%`, firstData, perPage], (err, result) => {
         if (err) {
           reject(new Error('Internal server error'))
         } else {
@@ -30,7 +24,7 @@ exports.getAllMovies = (queryPage, queryPerPage, keyword) => {
   })
 }
 
-exports.getMoviesRealesed = (queryPage, queryPerPage) => {
+exports.getMoviesRealesed = (queryPage, queryPerPage, sortBy, order) => {
   return new Promise((resolve, reject) => {
     connection.query('SELECT COUNT(*) AS totalData FROM movies WHERE realesed = true', (err, result) => {
       let totalData, page, perPage, totalPage
@@ -43,7 +37,7 @@ exports.getMoviesRealesed = (queryPage, queryPerPage) => {
         totalPage = Math.ceil(totalData / perPage)
       }
       const firstData = (perPage * page) - perPage
-      connection.query('SELECT * FROM movies WHERE realesed = true LIMIT ?, ?', [firstData, perPage], (err, result) => {
+      connection.query(`SELECT * FROM movies WHERE realesed = true ORDER BY ${sortBy} ${order} LIMIT ?, ?`, [firstData, perPage], (err, result) => {
         if (err) {
           reject(new Error('Internal server error'))
         } else {

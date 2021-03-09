@@ -2,13 +2,15 @@ const usersModel = require('../models/usersModel')
 const helper = require('../helpers/printHelper')
 
 exports.findAll = (req, res) => {
-  const queryPage = req.query.page
-  const queryPerPage = req.query.perPage
-  const keyword = req.query.keyword ? req.query.keyword : null
-  usersModel.getAllUsers(queryPage, queryPerPage, keyword)
+  const {page, perPage} = req.query
+  const keyword = req.query.keyword ? req.query.keyword : ''
+  const sortBy = req.query.sortBy ? req.query.sortBy : 'id'
+  const order = req.query.order ? req.query.order : 'ASC'
+  usersModel.getAllUsers(page, perPage, keyword, sortBy, order)
     .then(([totalData, totalPage, result, page, perPage]) => {
       if (result < 1) {
-        throw new Error('Users not found')
+        helper.printError(res, 400, 'Users not found')
+        return
       }
       helper.printPaginate(res, 200, 'Find all users successfully', totalData, totalPage, result, page, perPage)
     })
@@ -29,7 +31,8 @@ exports.findOne = (req, res) => {
   usersModel.getUsersById(id)
     .then((result) => {
       if (result < 1) {
-        throw new Error(`Cannot find one users with id = ${id}`)
+        helper.printError(res, 400, `Cannot find one users with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Find one users successfully', result)
     })
@@ -60,7 +63,8 @@ exports.create = (req, res) => {
   usersModel.createUsers(data)
     .then((result) => {
       if (result.affectedRows === 0) {
-        throw new Error('Error creating users')
+        helper.printError(res, 400, 'Error creating users')
+        return
       }
       helper.printSuccess(res, 200, 'New users has been created', result)
     })
@@ -95,7 +99,8 @@ exports.update = (req, res) => {
   usersModel.updateUsers(id, data)
     .then((result) => {
       if (result < 1) {
-        throw new Error(`Cannot update users with id = ${id}`)
+        helper.printError(res, 400, `Cannot update users with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Users has been updated', result)
     })
@@ -116,7 +121,8 @@ exports.delete = (req, res) => {
   usersModel.deleteUsers(id)
     .then((result) => {
       if (result.affectedRows === 0) {
-        throw new Error(`Cannot delete users with id = ${id}`)
+        helper.printError(res, 400, `Cannot delete users with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Users has been deleted', {})
     })

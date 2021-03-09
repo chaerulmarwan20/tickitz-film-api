@@ -1,14 +1,8 @@
 const connection = require('../configs/dbConfig')
 
-exports.getAllCinemas = (queryPage, queryPerPage, keyword) => {
+exports.getAllCinemas = (queryPage, queryPerPage, keyword, sortBy, order) => {
   return new Promise((resolve, reject) => {
-    let queryCount = 'SELECT COUNT(*) AS totalData FROM cinemas'
-    let queryLimit = 'SELECT cinemas.id, cinemas.name, cinemas.address, cities.name AS city, cinemas.createdAt, cinemas.updatedAt FROM cinemas INNER JOIN cities ON cinemas.idCity = cities.id LIMIT ?, ?'
-    if (keyword != null) {
-      queryCount = 'SELECT COUNT(*) AS totalData FROM cinemas WHERE name LIKE ? '
-      queryLimit = 'SELECT cinemas.id, cinemas.name, cinemas.address, cities.name AS city, cinemas.createdAt, cinemas.updatedAt FROM cinemas INNER JOIN cities ON cinemas.idCity = cities.id WHERE name LIKE ? LIMIT ?, ?'
-    }
-    connection.query(queryCount, `%${keyword}%`, (err, result) => {
+    connection.query('SELECT COUNT(*) AS totalData FROM cinemas WHERE name LIKE ?', `%${keyword}%`, (err, result) => {
       let totalData, page, perPage, totalPage
       if (err) {
         reject(new Error('Internal server error'))
@@ -19,7 +13,7 @@ exports.getAllCinemas = (queryPage, queryPerPage, keyword) => {
         totalPage = Math.ceil(totalData / perPage)
       }
       const firstData = (perPage * page) - perPage
-      connection.query(queryLimit, [keyword != null ? `%${keyword}%` : firstData, keyword != null ? firstData : perPage, perPage], (err, result) => {
+      connection.query(`SELECT cinemas.id, cinemas.name, cinemas.address, cities.name AS city, cinemas.createdAt, cinemas.updatedAt FROM cinemas INNER JOIN cities ON cinemas.idCity = cities.id WHERE cinemas.name LIKE ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`, [`%${keyword}%`, firstData, perPage], (err, result) => {
         if (err) {
           reject(new Error('Internal server error'))
         } else {

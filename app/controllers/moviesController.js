@@ -2,13 +2,15 @@ const moviesModel = require('../models/moviesModel')
 const helper = require('../helpers/printHelper')
 
 exports.findAll = (req, res) => {
-  const queryPage = req.query.page
-  const queryPerPage = req.query.perPage
-  const keyword = req.query.keyword ? req.query.keyword : null
-  moviesModel.getAllMovies(queryPage, queryPerPage, keyword)
+  const {page, perPage} = req.query
+  const keyword = req.query.keyword ? req.query.keyword : ''
+  const sortBy = req.query.sortBy ? req.query.sortBy : 'id'
+  const order = req.query.order ? req.query.order : 'ASC'
+  moviesModel.getAllMovies(page, perPage, keyword, sortBy, order)
     .then(([totalData, totalPage, result, page, perPage]) => {
       if (result < 1) {
-        throw new Error('Movies not found')
+        helper.printError(res, 400, 'Movies not found')
+        return
       }
       helper.printPaginate(res, 200, 'Find all movies successfully', totalData, totalPage, result, page, perPage)
     })
@@ -18,12 +20,14 @@ exports.findAll = (req, res) => {
 }
 
 exports.findAllRealesed = (req, res) => {
-  const queryPage = req.query.page
-  const queryPerPage = req.query.perPage
-  moviesModel.getMoviesRealesed(queryPage, queryPerPage)
+  const {page, perPage} = req.query
+  const sortBy = req.query.sortBy ? req.query.sortBy : 'id'
+  const order = req.query.order ? req.query.order : 'ASC'
+  moviesModel.getMoviesRealesed(page, perPage, sortBy, order)
     .then(([totalData, totalPage, result, page, perPage]) => {
       if (result < 1) {
-        throw new Error('Movies realesed not found')
+        helper.printError(res, 400, 'Movies realesed not found')
+        return
       }
       helper.printPaginate(res, 200, 'Find all movies realesed successfully', totalData, totalPage, result, page, perPage)
     })
@@ -44,7 +48,8 @@ exports.findOne = (req, res) => {
   moviesModel.getMoviesById(id)
     .then((result) => {
       if (result < 1) {
-        throw new Error(`Cannot find one movies with id = ${id}`)
+        helper.printError(res, 400, `Cannot find one movies with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Find one movies successfully', result)
     })
@@ -78,7 +83,8 @@ exports.create = (req, res) => {
   moviesModel.createMovies(data)
     .then((result) => {
       if (result.affectedRows === 0) {
-        throw new Error('Error creating movies')
+        helper.printError(res, 400, 'Error creating movies')
+        return
       }
       helper.printSuccess(res, 200, 'New movies has been created', result)
     })
@@ -116,7 +122,8 @@ exports.update = (req, res) => {
   moviesModel.updateMovies(id, data)
     .then((result) => {
       if (result < 1) {
-        throw new Error(`Cannot update movies with id = ${id}`)
+        helper.printError(res, 400, `Cannot update movies with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Movies has been updated', result)
     })
@@ -137,7 +144,8 @@ exports.delete = (req, res) => {
   moviesModel.deleteMovies(id)
     .then((result) => {
       if (result.affectedRows === 0) {
-        throw new Error(`Cannot delete movies with id = ${id}`)
+        helper.printError(res, 400, `Cannot delete movies with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Movies has been deleted', {})
     })

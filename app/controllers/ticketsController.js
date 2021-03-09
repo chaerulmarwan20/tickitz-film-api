@@ -2,13 +2,15 @@ const ticketsModel = require('../models/ticketsModel')
 const helper = require('../helpers/printHelper')
 
 exports.findAll = (req, res) => {
-  const queryPage = req.query.page
-  const queryPerPage = req.query.perPage
-  const keyword = req.query.keyword ? req.query.keyword : null
-  ticketsModel.getAllTickets(queryPage, queryPerPage, keyword)
+  const {page, perPage} = req.query
+  const keyword = req.query.keyword ? req.query.keyword : ''
+  const sortBy = req.query.sortBy ? req.query.sortBy : 'id'
+  const order = req.query.order ? req.query.order : 'ASC'
+  ticketsModel.getAllTickets(page, perPage, keyword, sortBy, order)
     .then(([totalData, totalPage, result, page, perPage]) => {
       if (result < 1) {
-        throw new Error('Tickets not found')
+        helper.printError(res, 400, 'Tickets not found')
+        return
       }
       helper.printPaginate(res, 200, 'Find all tickets successfully', totalData, totalPage, result, page, perPage)
     })
@@ -29,7 +31,8 @@ exports.findOne = (req, res) => {
   ticketsModel.getTicketsById(id)
     .then((result) => {
       if (result < 1) {
-        throw new Error(`Cannot find one tickets with id = ${id}`)
+        helper.printError(res, 400, `Cannot find one tickets with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Find one tickets successfully', result)
     })
@@ -77,7 +80,8 @@ exports.create = async (req, res) => {
   ticketsModel.createTickets(data)
     .then((result) => {
       if (result.affectedRows === 0) {
-        throw new Error('Error creating movies')
+        helper.printError(res, 400, 'Error creating movies')
+        return
       }
       helper.printSuccess(res, 200, 'New movies has been created', result)
     })
@@ -127,7 +131,8 @@ exports.update = async (req, res) => {
   ticketsModel.updateTickets(id, data)
     .then((result) => {
       if (result < 1) {
-        throw new Error(`Cannot update tickets with id = ${id}`)
+        helper.printError(res, 400, `Cannot update tickets with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Tickets has been updated', result)
     })
@@ -148,24 +153,10 @@ exports.delete = (req, res) => {
   ticketsModel.deleteTickets(id)
     .then((result) => {
       if (result.affectedRows === 0) {
-        throw new Error(`Cannot delete tickets with id = ${id}`)
+        helper.printError(res, 400, `Cannot delete tickets with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Tickets has been deleted', {})
-    })
-    .catch((err) => {
-      helper.printError(res, 500, err.message)
-    })
-}
-
-exports.sort = (req, res) => {
-  const queryPage = req.query.page
-  const queryPerPage = req.query.perPage
-  ticketsModel.sortByDate(queryPage, queryPerPage)
-    .then(([totalData, totalPage, result, page, perPage]) => {
-      if (result < 1) {
-        throw new Error('Sort by date tickets not found')
-      }
-      helper.printPaginate(res, 200, 'Sort by date tickets successfully', totalData, totalPage, result, page, perPage)
     })
     .catch((err) => {
       helper.printError(res, 500, err.message)

@@ -2,13 +2,15 @@ const cinemasModel = require('../models/cinemasModel')
 const helper = require('../helpers/printHelper')
 
 exports.findAll = (req, res) => {
-  const queryPage = req.query.page
-  const queryPerPage = req.query.perPage
-  const keyword = req.query.keyword ? req.query.keyword : null
-  cinemasModel.getAllCinemas(queryPage, queryPerPage, keyword)
+  const {page, perPage} = req.query
+  const keyword = req.query.keyword ? req.query.keyword : ''
+  const sortBy = req.query.sortBy ? req.query.sortBy : 'id'
+  const order = req.query.order ? req.query.order : 'ASC'
+  cinemasModel.getAllCinemas(page, perPage, keyword, sortBy, order)
     .then(([totalData, totalPage, result, page, perPage]) => {
       if (result < 1) {
-        throw new Error('Cinemas not found')
+        helper.printError(res, 400, 'Cinemas not found')
+        return
       }
       helper.printPaginate(res, 200, 'Find all cinemas successfully', totalData, totalPage, result, page, perPage)
     })
@@ -29,7 +31,8 @@ exports.findOne = (req, res) => {
   cinemasModel.getCinemasById(id)
     .then((result) => {
       if (result < 1) {
-        throw new Error(`Cannot fine one cinemas with id = ${id}`)
+        helper.printError(res, 400, `Cannot fine one cinemas with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Find one cinemas successfully', result)
     })
@@ -67,7 +70,8 @@ exports.create = async (req, res) => {
   cinemasModel.createCinemas(data)
     .then((result) => {
       if (result.affectedRows === 0) {
-        throw new Error('Error creating cinemas')
+        helper.printError(res, 400, 'Error creating cinemas')
+        return
       }
       helper.printSuccess(res, 200, 'New cinemas has been created', result)
     })
@@ -109,7 +113,8 @@ exports.update = async (req, res) => {
   cinemasModel.updateCinemas(id, data)
     .then((result) => {
       if (result < 1) {
-        throw new Error(`Cannot update cinemas with id = ${id}`)
+        helper.printError(res, 400, `Cannot update cinemas with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Cinemas has been updated', result)
     })
@@ -130,7 +135,8 @@ exports.delete = (req, res) => {
   cinemasModel.deleteCinemas(id)
     .then((result) => {
       if (result.affectedRows === 0) {
-        throw new Error(`Cannot delete cinemas with id = ${id}`)
+        helper.printError(res, 400, `Cannot delete cinemas with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Cinemas has been deleted', {})
     })

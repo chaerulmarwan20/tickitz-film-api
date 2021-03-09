@@ -2,13 +2,15 @@ const transactionsModel = require('../models/transactionsModel')
 const helper = require('../helpers/printHelper')
 
 exports.findAll = (req, res) => {
-  const queryPage = req.query.page
-  const queryPerPage = req.query.perPage
-  const keyword = req.query.keyword ? req.query.keyword : null
-  transactionsModel.getAllTransactions(queryPage, queryPerPage, keyword)
+  const {page, perPage} = req.query
+  const keyword = req.query.keyword ? req.query.keyword : ''
+  const sortBy = req.query.sortBy ? req.query.sortBy : 'id'
+  const order = req.query.order ? req.query.order : 'ASC'
+  transactionsModel.getAllTransactions(page, perPage, keyword, sortBy, order)
     .then(([totalData, totalPage, result, page, perPage]) => {
       if (result < 1) {
-        throw new Error('Transactions not found')
+        helper.printError(res, 400, 'Transactions not found')
+        return
       }
       helper.printPaginate(res, 200, 'Find all transactions successfully', totalData, totalPage, result, page, perPage)
     })
@@ -18,12 +20,14 @@ exports.findAll = (req, res) => {
 }
 
 exports.findAllSuccessed = (req, res) => {
-  const queryPage = req.query.page
-  const queryPerPage = req.query.perPage
-  transactionsModel.getTransactionsSuccessed(queryPage, queryPerPage)
+  const {page, perPage} = req.query
+  const sortBy = req.query.sortBy ? req.query.sortBy : 'id'
+  const order = req.query.order ? req.query.order : 'ASC'
+  transactionsModel.getTransactionsSuccessed(page, perPage, sortBy, order)
     .then(([totalData, totalPage, result, page, perPage]) => {
       if (result < 1) {
-        throw new Error('Transactions successed not found')
+        helper.printError(res, 400, 'Transactions successed not found')
+        return
       }
       helper.printPaginate(res, 200, 'Find all transactions successed successfully', totalData, totalPage, result, page, perPage)
     })
@@ -44,7 +48,8 @@ exports.findOne = (req, res) => {
   transactionsModel.getTransactionsById(id)
     .then((result) => {
       if (result < 1) {
-        throw new Error(`Cannot find one transactions with id = ${id}`)
+        helper.printError(res, 400, `Cannot find one transactions with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Find one transactions successfully', result)
     })
@@ -87,7 +92,8 @@ exports.create = async (req, res) => {
   transactionsModel.createTransactions(data)
     .then((result) => {
       if (result.affectedRows === 0) {
-        throw new Error('Error creating transactions')
+        helper.printError(res, 400, 'Error creating transactions')
+        return
       }
       helper.printSuccess(res, 200, 'New transactions has been created', result)
     })
@@ -133,7 +139,8 @@ exports.update = async (req, res) => {
   transactionsModel.updateTransactions(id, data)
     .then((result) => {
       if (result < 1) {
-        throw new Error(`Cannot update transactions with id = ${id}`)
+        helper.printError(res, 400, `Cannot update transactions with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Transactions has been updated', result)
     })
@@ -154,24 +161,10 @@ exports.delete = (req, res) => {
   transactionsModel.deleteTransactions(id)
     .then((result) => {
       if (result.affectedRows === 0) {
-        throw new Error(`Cannot delete transactions with id = ${id}`)
+        helper.printError(res, 400, `Cannot delete transactions with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Transactions has been deleted', {})
-    })
-    .catch((err) => {
-      helper.printError(res, 500, err.message, {})
-    })
-}
-
-exports.sort = (req, res) => {
-  const queryPage = req.query.page
-  const queryPerPage = req.query.perPage
-  transactionsModel.sortByDate(queryPage, queryPerPage)
-    .then(([totalData, totalPage, result, page, perPage]) => {
-      if (result < 1) {
-        throw new Error('Sort by date transactions not found')
-      }
-      helper.printPaginate(res, 200, 'Sort by date transactions successfully', totalData, totalPage, result, page, perPage)
     })
     .catch((err) => {
       helper.printError(res, 500, err.message)
@@ -179,14 +172,14 @@ exports.sort = (req, res) => {
 }
 
 exports.search = (req, res) => {
-  const queryPage = req.query.page
-  const queryPerPage = req.query.perPage
-  const from = req.query.from
-  const to = req.query.to
-  transactionsModel.search(queryPage, queryPerPage, from, to)
+  const {page, perPage, from, to} = req.query
+  const sortBy = req.query.sortBy ? req.query.sortBy : 'id'
+  const order = req.query.order ? req.query.order : 'ASC'
+  transactionsModel.search(page, perPage, from, to, sortBy, order)
     .then(([totalData, totalPage, result, page, perPage]) => {
       if (result < 1) {
-        throw new Error('Transactions not found')
+        helper.printError(res, 400, 'Transactions not found')
+        return
       }
       helper.printPaginate(res, 200, `Find transactions from ${from} to ${to} successfully`, totalData, totalPage, result, page, perPage)
     })

@@ -4,7 +4,6 @@ const ticketsController = require('../controllers/ticketsController')
 
 router
   .get('/', ticketsController.findAll)
-  .get('/sort', ticketsController.sort)
   .get('/:id', ticketsController.findOne)
   .post('/', ticketsController.create)
   .put('/:id', ticketsController.update)

@@ -1,14 +1,8 @@
 const connection = require('../configs/dbConfig')
 
-exports.getAllCities = (queryPage, queryPerPage, keyword) => {
+exports.getAllCities = (queryPage, queryPerPage, keyword, sortBy, order) => {
   return new Promise((resolve, reject) => {
-    let queryCount = 'SELECT COUNT(*) AS totalData FROM cities'
-    let queryLimit = 'SELECT * FROM cities LIMIT ?, ?'
-    if (keyword != null) {
-      queryCount = 'SELECT COUNT(*) AS totalData FROM cities WHERE name LIKE ? '
-      queryLimit = 'SELECT * FROM cities WHERE name LIKE ? LIMIT ?, ?'
-    }
-    connection.query(queryCount, `%${keyword}%`, (err, result) => {
+    connection.query('SELECT COUNT(*) AS totalData FROM cities WHERE name LIKE ?', `%${keyword}%`, (err, result) => {
       let totalData, page, perPage, totalPage
       if (err) {
         reject(new Error('Internal server error'))
@@ -19,7 +13,7 @@ exports.getAllCities = (queryPage, queryPerPage, keyword) => {
         totalPage = Math.ceil(totalData / perPage)
       }
       const firstData = (perPage * page) - perPage
-      connection.query(queryLimit, [keyword != null ? `%${keyword}%` : firstData, keyword != null ? firstData : perPage, perPage], (err, result) => {
+      connection.query(`SELECT * FROM cities WHERE name LIKE ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`, [`%${keyword}%`, firstData, perPage], (err, result) => {
         if (err) {
           reject(new Error('Internal server error'))
         } else {

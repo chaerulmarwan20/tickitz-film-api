@@ -2,13 +2,15 @@ const citiesModel = require('../models/citiesModel')
 const helper = require('../helpers/printHelper')
 
 exports.findAll = (req, res) => {
-  const queryPage = req.query.page
-  const queryPerPage = req.query.perPage
-  const keyword = req.query.keyword ? req.query.keyword : null
-  citiesModel.getAllCities(queryPage, queryPerPage, keyword)
+  const {page, perPage} = req.query
+  const keyword = req.query.keyword ? req.query.keyword : ''
+  const sortBy = req.query.sortBy ? req.query.sortBy : 'id'
+  const order = req.query.order ? req.query.order : 'ASC'
+  citiesModel.getAllCities(page, perPage, keyword, sortBy, order)
     .then(([totalData, totalPage, result, page, perPage]) => {
       if (result < 1) {
-        throw new Error('Cities not found')
+        helper.printError(res, 400, 'Cities not found')
+        return
       }
       helper.printPaginate(res, 200, 'Find all cities successfully', totalData, totalPage, result, page, perPage)
     })
@@ -29,7 +31,8 @@ exports.findOne = (req, res) => {
   citiesModel.getCitiesById(id)
     .then((result) => {
       if (result < 1) {
-        throw new Error(`Cannot find one cities with id = ${id}`)
+        helper.printError(res, 400, `Cannot find one cities with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Find one cities successfully', result)
     })
@@ -55,7 +58,8 @@ exports.create = (req, res) => {
   citiesModel.createCities(data)
     .then((result) => {
       if (result.affectedRows === 0) {
-        throw new Error('Error creating cities')
+        helper.printError(res, 400, 'Error creating cities')
+        return
       }
       helper.printSuccess(res, 200, 'New cities has been created', result)
     })
@@ -85,7 +89,8 @@ exports.update = (req, res) => {
   citiesModel.updateCities(id, data)
     .then((result) => {
       if (result < 1) {
-        throw new Error(`Cannot update cities with id = ${id}`)
+        helper.printError(res, 400, `Cannot update cities with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Cities has been updated', result)
     })
@@ -106,7 +111,8 @@ exports.delete = (req, res) => {
   citiesModel.deleteCities(id)
     .then((result) => {
       if (result.affectedRows === 0) {
-        throw new Error(`Cannot delete cities with id = ${id}`)
+        helper.printError(res, 400, `Cannot delete cities with id = ${id}`)
+        return
       }
       helper.printSuccess(res, 200, 'Cities has been deleted', {})
     })

@@ -1,14 +1,8 @@
 const connection = require('../configs/dbConfig')
 
-exports.getAllTickets = (queryPage, queryPerPage, keyword) => {
+exports.getAllTickets = (queryPage, queryPerPage, keyword, sortBy, order) => {
   return new Promise((resolve, reject) => {
-    let queryCount = 'SELECT COUNT(*) AS totalData FROM tickets'
-    let queryLimit = 'SELECT tickets.id, movies.title AS movies, cinemas.name AS cinema, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.qty, tickets.createdAt, tickets.updatedAt FROM ((tickets INNER JOIN movies ON tickets.idMovie = movies.id) INNER JOIN cinemas ON tickets.idCinema = cinemas.id) LIMIT ?, ?'
-    if (keyword != null) {
-      queryCount = 'SELECT COUNT(*) AS totalData FROM movies INNER JOIN tickets ON movies.id = tickets.idMovie WHERE movies.title LIKE ? AND tickets.qty > 0 '
-      queryLimit = 'SELECT movies.title AS movies, movies.genre, movies.cast, movies.synopsis, cinemas.name AS cinema, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.price, tickets.qty FROM ((tickets INNER JOIN movies ON tickets.idMovie = movies.id) INNER JOIN cinemas ON tickets.idCinema = cinemas.id) WHERE movies.title LIKE ? AND tickets.qty > 0 LIMIT ?, ?'
-    }
-    connection.query(queryCount, `%${keyword}%`, (err, result) => {
+    connection.query('SELECT COUNT(*) AS totalData FROM movies INNER JOIN tickets ON movies.id = tickets.idMovie WHERE movies.title LIKE ? AND tickets.qty > 0', `%${keyword}%`, (err, result) => {
       let totalData, page, perPage, totalPage
       if (err) {
         reject(new Error('Internal server error'))
@@ -19,7 +13,7 @@ exports.getAllTickets = (queryPage, queryPerPage, keyword) => {
         totalPage = Math.ceil(totalData / perPage)
       }
       const firstData = (perPage * page) - perPage
-      connection.query(queryLimit, [keyword != null ? `%${keyword}%` : firstData, keyword != null ? firstData : perPage, perPage], (err, result) => {
+      connection.query(`SELECT tickets.id, movies.title AS movies, movies.genre, movies.cast, movies.synopsis, cinemas.name AS cinema, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.price, tickets.qty FROM ((tickets INNER JOIN movies ON tickets.idMovie = movies.id) INNER JOIN cinemas ON tickets.idCinema = cinemas.id) WHERE movies.title LIKE ? AND tickets.qty > 0 ORDER BY ${sortBy} ${order} LIMIT ?, ?`, [`%${keyword}%`, firstData, perPage], (err, result) => {
         if (err) {
           reject(new Error('Internal server error'))
         } else {
@@ -86,30 +80,6 @@ exports.deleteTickets = (id) => {
       } else {
         reject(new Error('Internal server error'))
       }
-    })
-  })
-}
-
-exports.sortByDate = (queryPage, queryPerPage) => {
-  return new Promise((resolve, reject) => {
-    connection.query('SELECT COUNT(*) AS totalData FROM tickets', (err, result) => {
-      let totalData, page, perPage, totalPage
-      if (err) {
-        reject(new Error('Internal server error'))
-      } else {
-        totalData = result[0].totalData
-        page = queryPage ? parseInt(queryPage) : 1
-        perPage = queryPerPage ? parseInt(queryPerPage) : 5
-        totalPage = Math.ceil(totalData / perPage)
-      }
-      const firstData = (perPage * page) - perPage
-      connection.query('SELECT tickets.id, movies.title AS movies, cinemas.name AS cinema, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.qty, tickets.createdAt, tickets.updatedAt FROM ((tickets INNER JOIN movies ON tickets.idMovie = movies.id) INNER JOIN cinemas ON tickets.idCinema = cinemas.id) ORDER BY tickets.createdAt DESC LIMIT ?, ?', [firstData, perPage], (err, result) => {
-        if (err) {
-          reject(new Error('Internal server error'))
-        } else {
-          resolve([totalData, totalPage, result, page, perPage])
-        }
-      })
     })
   })
 }

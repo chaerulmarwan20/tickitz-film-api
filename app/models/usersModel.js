@@ -1,14 +1,8 @@
 const connection = require('../configs/dbConfig')
 
-exports.getAllUsers = (queryPage, queryPerPage, keyword) => {
+exports.getAllUsers = (queryPage, queryPerPage, keyword, sortBy, order) => {
   return new Promise((resolve, reject) => {
-    let queryCount = 'SELECT COUNT(*) AS totalData FROM users'
-    let queryLimit = 'SELECT * FROM users LIMIT ?, ?'
-    if (keyword != null) {
-      queryCount = 'SELECT COUNT(*) AS totalData FROM users WHERE fullName LIKE ? OR username LIKE ? OR email LIKE ?'
-      queryLimit = 'SELECT * FROM users WHERE fullName LIKE ? OR username LIKE ? OR email LIKE ? LIMIT ?, ?'
-    }
-    connection.query(queryCount, [`%${keyword}%`, `%${keyword}%`, `%${keyword}%`], (err, result) => {
+    connection.query('SELECT COUNT(*) AS totalData FROM users WHERE fullName LIKE ? OR username LIKE ? OR email LIKE ?', [`%${keyword}%`, `%${keyword}%`, `%${keyword}%`], (err, result) => {
       let totalData, page, perPage, totalPage
       if (err) {
         reject(new Error('Internal server error'))
@@ -19,7 +13,7 @@ exports.getAllUsers = (queryPage, queryPerPage, keyword) => {
         totalPage = Math.ceil(totalData / perPage)
       }
       const firstData = (perPage * page) - perPage
-      connection.query(queryLimit, [keyword != null ? `%${keyword}%` : firstData, keyword != null ? `%${keyword}%` : perPage, keyword != null ? `%${keyword}%` : firstData, firstData, perPage], (err, result) => {
+      connection.query(`SELECT * FROM users WHERE fullName LIKE ? OR username LIKE ? OR email LIKE ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`, [`%${keyword}%`, `%${keyword}%`, `%${keyword}%`, firstData, perPage], (err, result) => {
         if (err) {
           reject(new Error('Internal server error'))
         } else {
@@ -44,17 +38,23 @@ exports.getUsersById = (id) => {
 
 exports.createUsers = (data) => {
   return new Promise((resolve, reject) => {
-    connection.query('INSERT INTO users SET ?', data, (err, result) => {
-      if (!err) {
-        connection.query('SELECT * FROM users WHERE id = ?', result.insertId, (err, result) => {
+    connection.query('SELECT * FROM users WHERE username = ? OR email = ?', [data.username, data.email], (err, result) => {
+      if (result.length === 1) {
+        reject(new Error('Username or email has been registered'))
+      } else {
+        connection.query('INSERT INTO users SET ?', data, (err, result) => {
           if (!err) {
-            resolve(result)
+            connection.query('SELECT * FROM users WHERE id = ?', result.insertId, (err, result) => {
+              if (!err) {
+                resolve(result)
+              } else {
+                reject(new Error('Internal server error'))
+              }
+            })
           } else {
             reject(new Error('Internal server error'))
           }
         })
-      } else {
-        reject(new Error('Internal server error'))
       }
     })
   })
