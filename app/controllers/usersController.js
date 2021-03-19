@@ -1,6 +1,9 @@
-const md5 = require("md5");
+const jwt = require("jsonwebtoken");
+const ip = require("ip");
 const usersModel = require("../models/usersModel");
 const helper = require("../helpers/printHelper");
+const hash = require("../helpers/hashPassword");
+const secretKey = process.env.SECRET_KEY;
 
 exports.findAll = (req, res) => {
   const { page, perPage } = req.query;
@@ -53,7 +56,12 @@ exports.findOne = (req, res) => {
     });
 };
 
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
+  if (!req.file) {
+    helper.printError(res, 422, "Image is required");
+    return;
+  }
+
   const {
     firstName,
     lastName,
@@ -61,7 +69,6 @@ exports.create = (req, res) => {
     username,
     email,
     password,
-    role,
   } = req.body;
 
   if (
@@ -70,8 +77,7 @@ exports.create = (req, res) => {
     !phoneNumber ||
     !username ||
     !email ||
-    !password ||
-    !role
+    !password
   ) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
@@ -81,12 +87,12 @@ exports.create = (req, res) => {
     firstName,
     lastName,
     fullName: firstName + " " + lastName,
-    image: "default.jpg",
+    image: req.file.path,
     phoneNumber,
     username,
     email,
-    password: md5(password),
-    role,
+    password: await hash.hashPassword(password),
+    role: 2,
     moviegoers: false,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -99,6 +105,7 @@ exports.create = (req, res) => {
         helper.printError(res, 400, "Error creating users");
         return;
       }
+      delete result[0].password;
       helper.printSuccess(res, 200, "New users has been created", result);
     })
     .catch((err) => {
@@ -110,7 +117,7 @@ exports.create = (req, res) => {
     });
 };
 
-exports.update = (req, res) => {
+exports.update = async (req, res) => {
   const id = req.params.id;
   const checkId = /^[0-9]+$/;
 
@@ -121,7 +128,6 @@ exports.update = (req, res) => {
     username,
     email,
     password,
-    role,
   } = req.body;
 
   if (
@@ -130,8 +136,7 @@ exports.update = (req, res) => {
     !phoneNumber ||
     !username ||
     !email ||
-    !password ||
-    !role
+    !password
   ) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
@@ -148,8 +153,8 @@ exports.update = (req, res) => {
     phoneNumber,
     username,
     email,
-    password: md5(password),
-    role,
+    password: await hash.hashPassword(password),
+    role: 2,
     moviegoers: false,
   };
 
@@ -160,6 +165,7 @@ exports.update = (req, res) => {
         helper.printError(res, 400, `Cannot update users with id = ${id}`);
         return;
       }
+      delete result[0].password;
       helper.printSuccess(res, 200, "Users has been updated", result);
     })
     .catch((err) => {
@@ -200,21 +206,46 @@ exports.login = (req, res) => {
 
   const data = {
     email,
-    password: md5(password),
+    password,
   };
 
   usersModel
     .login(data)
     .then((result) => {
-      helper.printSuccess(res, 200, "Login successfull", result[0].id);
+      delete result.password;
+      delete result.createdAt;
+      delete result.updatedAt;
+      const payload = {
+        id: result.id,
+        email: result.email,
+        firstName: result.firstName,
+        lastName: result.lastName,
+        fullName: result.fullName,
+        phoneNumber: result.phoneNumber,
+        role: result.role,
+      };
+      jwt.sign(payload, secretKey, { expiresIn: 1440 }, async (err, token) => {
+        result.token = token;
+        const data = {
+          idUser: result.id,
+          accessToken: token,
+          ipAddress: ip.address(),
+        };
+        await usersModel.createToken(data);
+        helper.printSuccess(res, 200, "Login successfull", result);
+      });
     })
     .catch((err) => {
-      if (err.message === "Wrong email or password") {
+      if (err.message === "Wrong email" || err.message === "Wrong password") {
         helper.printError(res, 400, err.message);
       } else {
         helper.printError(res, 500, err.message);
       }
     });
+};
+
+exports.success = (req, res) => {
+  helper.printSuccess(res, 200, "Successfull", req.auth);
 };
 
 exports.moviegoers = (req, res) => {

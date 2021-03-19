@@ -1,3 +1,4 @@
+const bcrypt = require("bcrypt");
 const connection = require("../configs/dbConfig");
 
 exports.getAllUsers = (queryPage, queryPerPage, keyword, sortBy, order) => {
@@ -141,26 +142,44 @@ exports.moviegoers = (email) => {
 };
 
 exports.login = (data) => {
-  let post = {
-    email: data.email,
-    password: data.password,
-  };
-
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT * FROM users WHERE email = ? AND password = ?",
-      [post.email, post.password],
+      "SELECT * FROM users WHERE email = ?",
+      data.email,
       (err, result) => {
         if (err) {
           reject(new Error("Internal server error"));
         } else {
           if (result.length == 1) {
-            resolve(result);
+            const user = result[0];
+            bcrypt.compare(data.password, result[0].password, (err, result) => {
+              if (err) {
+                reject(new Error("Internal server error"));
+              } else {
+                if (result) {
+                  resolve(user);
+                } else {
+                  reject(new Error("Wrong password"));
+                }
+              }
+            });
           } else {
-            reject(new Error("Wrong email or password"));
+            reject(new Error("Wrong email"));
           }
         }
       }
     );
+  });
+};
+
+exports.createToken = (data) => {
+  return new Promise((resolve, reject) => {
+    connection.query("INSERT INTO access_token SET ?", data, (err, result) => {
+      if (!err) {
+        resolve(result);
+      } else {
+        reject(new Error("Internal server error"));
+      }
+    });
   });
 };

@@ -73,7 +73,7 @@ exports.getTransactionsSuccessed = (queryPage, queryPerPage, sortBy, order) => {
 exports.getTransactionsById = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT transactions.id, transactions.date AS dateTransactions, transactions.paymentMethod, users.fullName, users.username, tickets.movieTitle, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.price, tickets.idCinema, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id) WHERE transactions.idUser = ?",
+      "SELECT transactions.id, transactions.date AS dateTransactions, transactions.paymentMethod, users.fullName, users.username, tickets.movieTitle, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.price, tickets.idCinema, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id) WHERE transactions.id = ?",
       id,
       (err, result) => {
         if (!err) {
@@ -209,6 +209,22 @@ exports.search = (queryPage, queryPerPage, from, to, sortBy, order) => {
             }
           }
         );
+      }
+    );
+  });
+};
+
+exports.getTransactionsUsers = (id, sortBy, order) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      `SELECT transactions.id, transactions.date AS dateTransactions, transactions.paymentMethod, users.fullName, users.username, tickets.movieTitle, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.price, tickets.idCinema, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id) WHERE transactions.idUser = ? ORDER BY ${sortBy} ${order}`,
+      id,
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
       }
     );
   });
