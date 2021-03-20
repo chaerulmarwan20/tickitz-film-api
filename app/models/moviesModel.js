@@ -1,4 +1,5 @@
 const connection = require("../configs/dbConfig");
+const helper = require("../helpers/linkPaginate");
 
 exports.getAllMovies = (queryPage, queryPerPage, keyword, sortBy, order) => {
   return new Promise((resolve, reject) => {
@@ -6,7 +7,7 @@ exports.getAllMovies = (queryPage, queryPerPage, keyword, sortBy, order) => {
       "SELECT COUNT(*) AS totalData FROM movies WHERE title LIKE ?",
       `%${keyword}%`,
       (err, result) => {
-        let totalData, page, perPage, totalPage;
+        let totalData, page, perPage, totalPage, previousPage, nextPage;
         if (err) {
           reject(new Error("Internal server error"));
         } else {
@@ -14,6 +15,17 @@ exports.getAllMovies = (queryPage, queryPerPage, keyword, sortBy, order) => {
           page = queryPage ? parseInt(queryPage) : 1;
           perPage = queryPerPage ? parseInt(queryPerPage) : 5;
           totalPage = Math.ceil(totalData / perPage);
+          const [previous, next] = helper.link(
+            page,
+            perPage,
+            totalPage,
+            keyword,
+            sortBy,
+            order,
+            "movies"
+          );
+          previousPage = previous;
+          nextPage = next;
         }
         const firstData = perPage * page - perPage;
         connection.query(
@@ -23,7 +35,15 @@ exports.getAllMovies = (queryPage, queryPerPage, keyword, sortBy, order) => {
             if (err) {
               reject(new Error("Internal server error"));
             } else {
-              resolve([totalData, totalPage, result, page, perPage]);
+              resolve([
+                totalData,
+                totalPage,
+                result,
+                page,
+                perPage,
+                previousPage,
+                nextPage,
+              ]);
             }
           }
         );
@@ -141,6 +161,22 @@ exports.deleteMovies = (id) => {
     connection.query("DELETE FROM movies WHERE id = ?", id, (err, result) => {
       if (!err) {
         resolve(result);
+      } else {
+        reject(new Error("Internal server error"));
+      }
+    });
+  });
+};
+
+exports.findMovies = (id, message) => {
+  return new Promise((resolve, reject) => {
+    connection.query("SELECT * FROM movies WHERE id = ?", id, (err, result) => {
+      if (!err) {
+        if (result.length == 1) {
+          resolve(result);
+        } else {
+          reject(new Error(`Cannot ${message} movies with id = ${id}`));
+        }
       } else {
         reject(new Error("Internal server error"));
       }

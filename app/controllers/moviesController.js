@@ -1,3 +1,5 @@
+const path = require("path");
+const fs = require("fs");
 const moviesModel = require("../models/moviesModel");
 const helper = require("../helpers/printHelper");
 
@@ -8,22 +10,34 @@ exports.findAll = (req, res) => {
   const order = req.query.order ? req.query.order : "ASC";
   moviesModel
     .getAllMovies(page, perPage, keyword, sortBy, order)
-    .then(([totalData, totalPage, result, page, perPage]) => {
-      if (result < 1) {
-        helper.printError(res, 400, "Movies not found");
-        return;
-      }
-      helper.printPaginate(
-        res,
-        200,
-        "Find all movies successfully",
+    .then(
+      ([
         totalData,
         totalPage,
         result,
         page,
-        perPage
-      );
-    })
+        perPage,
+        previousPage,
+        nextPage,
+      ]) => {
+        if (result < 1) {
+          helper.printError(res, 400, "Movies not found");
+          return;
+        }
+        helper.printPaginate(
+          res,
+          200,
+          "Find all movies successfully",
+          totalData,
+          totalPage,
+          result,
+          page,
+          perPage,
+          previousPage,
+          nextPage
+        );
+      }
+    )
     .catch((err) => {
       helper.printError(res, 500, err.message);
     });
@@ -90,9 +104,17 @@ exports.create = (req, res) => {
     rating,
     realesed,
   } = req.body;
+  let image;
+  if (!req.file) {
+    helper.printError(res, 400, "Image is required");
+    return;
+  } else {
+    image = req.file.path;
+  }
 
   if (
     !title ||
+    !image ||
     !genre ||
     !duration ||
     !director ||
@@ -106,14 +128,14 @@ exports.create = (req, res) => {
 
   const data = {
     title,
-    image: "default.jpg",
+    image,
     genre,
     duration,
     director,
     cast,
     synopsis,
     rating,
-    realesed: realesed || false,
+    realesed: realesed === "true" ? true : false,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -165,27 +187,37 @@ exports.update = (req, res) => {
 
   const data = {
     title,
-    image: "default.jpg",
     genre,
     duration,
     director,
     cast,
     synopsis,
     rating,
-    realesed: realesed || false,
+    realesed: realesed === "true" ? true : false,
   };
 
   moviesModel
-    .updateMovies(id, data)
+    .findMovies(id, "update")
     .then((result) => {
-      if (result < 1) {
-        helper.printError(res, 400, `Cannot update movies with id = ${id}`);
-        return;
+      let image;
+      if (!req.file) {
+        image = result[0].image;
+      } else {
+        const oldImage = result[0].image;
+        removeImage(oldImage);
+        image = req.file.path;
       }
+      data.image = image;
+      return moviesModel.updateMovies(id, data);
+    })
+    .then((result) => {
       helper.printSuccess(res, 200, "Movies has been updated", result);
     })
     .catch((err) => {
-      helper.printError(res, 500, err.message);
+      if (err.message === "Internal server error") {
+        helper.printError(res, 500, err.message);
+      }
+      helper.printError(res, 400, err.message);
     });
 };
 
@@ -199,17 +231,26 @@ exports.delete = (req, res) => {
   }
 
   moviesModel
-    .deleteMovies(id)
+    .findMovies(id, "delete")
     .then((result) => {
-      if (result.affectedRows === 0) {
-        helper.printError(res, 400, `Cannot delete movies with id = ${id}`);
-        return;
-      }
+      const image = result[0].image;
+      removeImage(image);
+      return moviesModel.deleteMovies(id);
+    })
+    .then((result) => {
       helper.printSuccess(res, 200, "Movies has been deleted", {});
     })
     .catch((err) => {
-      helper.printError(res, 500, err.message);
+      if (err.message === "Internal server error") {
+        helper.printError(res, 500, err.message);
+      }
+      helper.printError(res, 400, err.message);
     });
+};
+
+const removeImage = (filePath) => {
+  filePath = path.join(__dirname, "../..", filePath);
+  fs.unlink(filePath, (err) => new Error(err));
 };
 
 exports.searchRealesed = (req, res) => {

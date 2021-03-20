@@ -8,22 +8,34 @@ exports.findAll = (req, res) => {
   const order = req.query.order ? req.query.order : "ASC";
   transactionsModel
     .getAllTransactions(page, perPage, keyword, sortBy, order)
-    .then(([totalData, totalPage, result, page, perPage]) => {
-      if (result < 1) {
-        helper.printError(res, 400, "Transactions not found");
-        return;
-      }
-      helper.printPaginate(
-        res,
-        200,
-        "Find all transactions successfully",
+    .then(
+      ([
         totalData,
         totalPage,
         result,
         page,
-        perPage
-      );
-    })
+        perPage,
+        previousPage,
+        nextPage,
+      ]) => {
+        if (result < 1) {
+          helper.printError(res, 400, "Transactions not found");
+          return;
+        }
+        helper.printPaginate(
+          res,
+          200,
+          "Find all transactions successfully",
+          totalData,
+          totalPage,
+          result,
+          page,
+          perPage,
+          previousPage,
+          nextPage
+        );
+      }
+    )
     .catch((err) => {
       helper.printError(res, 500, err.message);
     });
@@ -89,18 +101,23 @@ exports.findOne = (req, res) => {
 };
 
 exports.create = async (req, res) => {
-  const { paymentMethod, idUser, idTicket, qty, total } = req.body;
+  const { idPaymentMethod, idUser, idTicket, qty, total } = req.body;
 
-  if (!paymentMethod || !idUser || !idTicket || !qty || !total) {
+  if (!idPaymentMethod || !idUser || !idTicket || !qty || !total) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   }
 
   try {
+    const getPayment = await transactionsModel.getPayment(idPaymentMethod);
     const getUser = await transactionsModel.getUser(idUser);
     const getTicket = await transactionsModel.getTicket(idTicket);
-    if (getTicket < 1 || getUser < 1) {
-      helper.printError(res, 400, "Id user or ticket not found!");
+    if (getTicket < 1 || getUser < 1 || getPayment < 1) {
+      helper.printError(
+        res,
+        400,
+        "Id payment method or user or ticket not found!"
+      );
       return;
     }
   } catch (err) {
@@ -109,7 +126,7 @@ exports.create = async (req, res) => {
 
   const data = {
     date: new Date(),
-    paymentMethod,
+    idPaymentMethod,
     idUser,
     idTicket,
     qty,
@@ -142,9 +159,9 @@ exports.update = async (req, res) => {
   const id = req.params.id;
   const checkId = /^[0-9]+$/;
 
-  const { paymentMethod, idUser, idTicket, qty, total, status } = req.body;
+  const { idPaymentMethod, idUser, idTicket, qty, total, status } = req.body;
 
-  if (!paymentMethod || !idUser || !idTicket || !qty || !total || !status) {
+  if (!idPaymentMethod || !idUser || !idTicket || !qty || !total || !status) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   } else if (id.match(checkId) == null) {
@@ -153,10 +170,15 @@ exports.update = async (req, res) => {
   }
 
   try {
+    const getPayment = await transactionsModel.getPayment(idPaymentMethod);
     const getUser = await transactionsModel.getUser(idUser);
     const getTicket = await transactionsModel.getTicket(idTicket);
-    if (getTicket < 1 || getUser < 1) {
-      helper.printError(res, 400, "Id user or ticket not found!");
+    if (getTicket < 1 || getUser < 1 || getPayment < 1) {
+      helper.printError(
+        res,
+        400,
+        "Id payment method or user or ticket not found!"
+      );
       return;
     }
   } catch (err) {
@@ -164,7 +186,7 @@ exports.update = async (req, res) => {
   }
 
   const data = {
-    paymentMethod,
+    idPaymentMethod,
     idUser,
     idTicket,
     qty,

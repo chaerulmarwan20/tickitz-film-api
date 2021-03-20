@@ -1,4 +1,6 @@
-const citiesModel = require("../models/citiesModel");
+const path = require("path");
+const fs = require("fs");
+const paymentsModel = require("../models/paymentsModel");
 const helper = require("../helpers/printHelper");
 
 exports.findAll = (req, res) => {
@@ -6,8 +8,8 @@ exports.findAll = (req, res) => {
   const keyword = req.query.keyword ? req.query.keyword : "";
   const sortBy = req.query.sortBy ? req.query.sortBy : "id";
   const order = req.query.order ? req.query.order : "ASC";
-  citiesModel
-    .getAllCities(page, perPage, keyword, sortBy, order)
+  paymentsModel
+    .getAllPayments(page, perPage, keyword, sortBy, order)
     .then(
       ([
         totalData,
@@ -19,13 +21,13 @@ exports.findAll = (req, res) => {
         nextPage,
       ]) => {
         if (result < 1) {
-          helper.printError(res, 400, "Cities not found");
+          helper.printError(res, 400, "Payments not found");
           return;
         }
         helper.printPaginate(
           res,
           200,
-          "Find all cities successfully",
+          "Find all payments successfully",
           totalData,
           totalPage,
           result,
@@ -50,14 +52,14 @@ exports.findOne = (req, res) => {
     return;
   }
 
-  citiesModel
-    .getCitiesById(id)
+  paymentsModel
+    .getPaymentsById(id)
     .then((result) => {
       if (result < 1) {
-        helper.printError(res, 400, `Cannot find one cities with id = ${id}`);
+        helper.printError(res, 400, `Cannot fine one payments with id = ${id}`);
         return;
       }
-      helper.printSuccess(res, 200, "Find one cities successfully", result);
+      helper.printSuccess(res, 200, "Find one payments successfully", result);
     })
     .catch((err) => {
       helper.printError(res, 500, err.message);
@@ -66,26 +68,34 @@ exports.findOne = (req, res) => {
 
 exports.create = (req, res) => {
   const { name } = req.body;
+  let image;
+  if (!req.file) {
+    helper.printError(res, 400, "Image is required");
+    return;
+  } else {
+    image = req.file.path;
+  }
 
-  if (!name) {
+  if (!name || !image) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   }
 
   const data = {
     name,
+    image,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
-  citiesModel
-    .createCities(data)
+  paymentsModel
+    .createPayments(data)
     .then((result) => {
       if (result.affectedRows === 0) {
-        helper.printError(res, 400, "Error creating cities");
+        helper.printError(res, 400, "Error creating payments");
         return;
       }
-      helper.printSuccess(res, 200, "New cities has been created", result);
+      helper.printSuccess(res, 200, "New payments has been created", result);
     })
     .catch((err) => {
       helper.printError(res, 500, err.message);
@@ -110,17 +120,28 @@ exports.update = (req, res) => {
     name,
   };
 
-  citiesModel
-    .updateCities(id, data)
+  paymentsModel
+    .findPayments(id, "update")
     .then((result) => {
-      if (result < 1) {
-        helper.printError(res, 400, `Cannot update cities with id = ${id}`);
-        return;
+      let image;
+      if (!req.file) {
+        image = result[0].image;
+      } else {
+        const oldImage = result[0].image;
+        removeImage(oldImage);
+        image = req.file.path;
       }
-      helper.printSuccess(res, 200, "Cities has been updated", result);
+      data.image = image;
+      return paymentsModel.updatePayments(id, data);
+    })
+    .then((result) => {
+      helper.printSuccess(res, 200, "Payments has been updated", result);
     })
     .catch((err) => {
-      helper.printError(res, 500, err.message);
+      if (err.message === "Internal server error") {
+        helper.printError(res, 500, err.message);
+      }
+      helper.printError(res, 400, err.message);
     });
 };
 
@@ -133,16 +154,25 @@ exports.delete = (req, res) => {
     return;
   }
 
-  citiesModel
-    .deleteCities(id)
+  paymentsModel
+    .findPayments(id, "delete")
     .then((result) => {
-      if (result.affectedRows === 0) {
-        helper.printError(res, 400, `Cannot delete cities with id = ${id}`);
-        return;
-      }
-      helper.printSuccess(res, 200, "Cities has been deleted", {});
+      const image = result[0].image;
+      removeImage(image);
+      return paymentsModel.deletePayments(id);
+    })
+    .then((result) => {
+      helper.printSuccess(res, 200, "Payments has been deleted", {});
     })
     .catch((err) => {
-      helper.printError(res, 500, err.message);
+      if (err.message === "Internal server error") {
+        helper.printError(res, 500, err.message);
+      }
+      helper.printError(res, 400, err.message);
     });
+};
+
+const removeImage = (filePath) => {
+  filePath = path.join(__dirname, "../..", filePath);
+  fs.unlink(filePath, (err) => new Error(err));
 };

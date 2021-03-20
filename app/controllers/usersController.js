@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 const ip = require("ip");
+const path = require("path");
+const fs = require("fs");
 const usersModel = require("../models/usersModel");
 const helper = require("../helpers/printHelper");
 const hash = require("../helpers/hashPassword");
@@ -12,22 +14,34 @@ exports.findAll = (req, res) => {
   const order = req.query.order ? req.query.order : "ASC";
   usersModel
     .getAllUsers(page, perPage, keyword, sortBy, order)
-    .then(([totalData, totalPage, result, page, perPage]) => {
-      if (result < 1) {
-        helper.printError(res, 400, "Users not found");
-        return;
-      }
-      helper.printPaginate(
-        res,
-        200,
-        "Find all users successfully",
+    .then(
+      ([
         totalData,
         totalPage,
         result,
         page,
-        perPage
-      );
-    })
+        perPage,
+        previousPage,
+        nextPage,
+      ]) => {
+        if (result < 1) {
+          helper.printError(res, 400, "Users not found");
+          return;
+        }
+        helper.printPaginate(
+          res,
+          200,
+          "Find all users successfully",
+          totalData,
+          totalPage,
+          result,
+          page,
+          perPage,
+          previousPage,
+          nextPage
+        );
+      }
+    )
     .catch((err) => {
       helper.printError(res, 500, err.message);
     });
@@ -57,9 +71,11 @@ exports.findOne = (req, res) => {
 };
 
 exports.create = async (req, res) => {
+  let image;
   if (!req.file) {
-    helper.printError(res, 422, "Image is required");
-    return;
+    image = "images\\avatar.png";
+  } else {
+    image = req.file.path;
   }
 
   const {
@@ -87,7 +103,7 @@ exports.create = async (req, res) => {
     firstName,
     lastName,
     fullName: firstName + " " + lastName,
-    image: req.file.path,
+    image,
     phoneNumber,
     username,
     email,
@@ -149,7 +165,6 @@ exports.update = async (req, res) => {
     firstName,
     lastName,
     fullName: firstName + " " + lastName,
-    image: "default.jpg",
     phoneNumber,
     username,
     email,
@@ -159,17 +174,30 @@ exports.update = async (req, res) => {
   };
 
   usersModel
-    .updateUsers(id, data)
+    .findUser(id, "update")
     .then((result) => {
-      if (result < 1) {
-        helper.printError(res, 400, `Cannot update users with id = ${id}`);
-        return;
+      let image;
+      if (!req.file) {
+        image = result[0].image;
+      } else {
+        const oldImage = result[0].image;
+        if (oldImage !== "images\\avatar.png") {
+          removeImage(oldImage);
+        }
+        image = req.file.path;
       }
+      data.image = image;
+      return usersModel.updateUsers(id, data);
+    })
+    .then((result) => {
       delete result[0].password;
       helper.printSuccess(res, 200, "Users has been updated", result);
     })
     .catch((err) => {
-      helper.printError(res, 500, err.message);
+      if (err.message === "Internal server error") {
+        helper.printError(res, 500, err.message);
+      }
+      helper.printError(res, 400, err.message);
     });
 };
 
@@ -183,17 +211,28 @@ exports.delete = (req, res) => {
   }
 
   usersModel
-    .deleteUsers(id)
+    .findUser(id, "delete")
     .then((result) => {
-      if (result.affectedRows === 0) {
-        helper.printError(res, 400, `Cannot delete users with id = ${id}`);
-        return;
+      const image = result[0].image;
+      if (image !== "images\\avatar.png") {
+        removeImage(image);
       }
+      return usersModel.deleteUsers(id);
+    })
+    .then((result) => {
       helper.printSuccess(res, 200, "Users has been deleted", {});
     })
     .catch((err) => {
-      helper.printError(res, 500, err.message);
+      if (err.message === "Internal server error") {
+        helper.printError(res, 500, err.message);
+      }
+      helper.printError(res, 400, err.message);
     });
+};
+
+const removeImage = (filePath) => {
+  filePath = path.join(__dirname, "../..", filePath);
+  fs.unlink(filePath, (err) => new Error(err));
 };
 
 exports.login = (req, res) => {

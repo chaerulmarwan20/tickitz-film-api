@@ -40,7 +40,10 @@ const fileFilter = (req, file, cb) => {
 
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use(
-  multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
+  multer({
+    storage: fileStorage,
+    fileFilter: fileFilter,
+  }).single("image")
 );
 app.use(express.json());
 app.use(

@@ -1,10 +1,10 @@
 const connection = require("../configs/dbConfig");
 const helper = require("../helpers/linkPaginate");
 
-exports.getAllTickets = (queryPage, queryPerPage, keyword, sortBy, order) => {
+exports.getAllPayments = (queryPage, queryPerPage, keyword, sortBy, order) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT COUNT(*) AS totalData FROM movies INNER JOIN tickets ON movies.id = tickets.idMovie WHERE movies.title LIKE ? AND tickets.qty > 0",
+      "SELECT COUNT(*) AS totalData FROM payments WHERE name LIKE ?",
       `%${keyword}%`,
       (err, result) => {
         let totalData, page, perPage, totalPage, previousPage, nextPage;
@@ -22,14 +22,14 @@ exports.getAllTickets = (queryPage, queryPerPage, keyword, sortBy, order) => {
             keyword,
             sortBy,
             order,
-            "tickets"
+            "payments"
           );
           previousPage = previous;
           nextPage = next;
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT tickets.id, movies.title AS movies, movies.genre, movies.cast, movies.synopsis, cinemas.name AS cinema, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.price, tickets.qty FROM ((tickets INNER JOIN movies ON tickets.idMovie = movies.id) INNER JOIN cinemas ON tickets.idCinema = cinemas.id) WHERE movies.title LIKE ? AND tickets.qty > 0 ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          `SELECT * FROM payments WHERE name LIKE ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
           [`%${keyword}%`, firstData, perPage],
           (err, result) => {
             if (err) {
@@ -52,10 +52,10 @@ exports.getAllTickets = (queryPage, queryPerPage, keyword, sortBy, order) => {
   });
 };
 
-exports.getTicketsById = (id) => {
+exports.getPaymentsById = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT tickets.id, movies.title AS movies, cinemas.name AS cinema, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.qty, tickets.createdAt, tickets.updatedAt FROM ((tickets INNER JOIN movies ON tickets.idMovie = movies.id) INNER JOIN cinemas ON tickets.idCinema = cinemas.id) WHERE tickets.id = ?",
+      "SELECT * FROM payments WHERE id = ?",
       id,
       (err, result) => {
         if (!err) {
@@ -68,12 +68,12 @@ exports.getTicketsById = (id) => {
   });
 };
 
-exports.createTickets = (data) => {
+exports.createPayments = (data) => {
   return new Promise((resolve, reject) => {
-    connection.query("INSERT INTO tickets SET ?", data, (err, result) => {
+    connection.query("INSERT INTO payments SET ?", data, (err, result) => {
       if (!err) {
         connection.query(
-          "SELECT * FROM tickets WHERE id = ?",
+          "SELECT * FROM payments WHERE id = ?",
           result.insertId,
           (err, result) => {
             if (!err) {
@@ -90,15 +90,15 @@ exports.createTickets = (data) => {
   });
 };
 
-exports.updateTickets = (id, data) => {
+exports.updatePayments = (id, data) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "UPDATE tickets SET ? WHERE id = ?",
+      "UPDATE payments SET ? WHERE id = ?",
       [data, id],
       (err, result) => {
         if (!err) {
           connection.query(
-            "SELECT * FROM tickets WHERE id = ?",
+            "SELECT * FROM payments WHERE id = ?",
             id,
             (err, result) => {
               if (!err) {
@@ -116,9 +116,9 @@ exports.updateTickets = (id, data) => {
   });
 };
 
-exports.deleteTickets = (id) => {
+exports.deletePayments = (id) => {
   return new Promise((resolve, reject) => {
-    connection.query("DELETE FROM tickets WHERE id = ?", id, (err, result) => {
+    connection.query("DELETE FROM payments WHERE id = ?", id, (err, result) => {
       if (!err) {
         resolve(result);
       } else {
@@ -128,30 +128,18 @@ exports.deleteTickets = (id) => {
   });
 };
 
-exports.getMovieTitle = (idMovie) => {
+exports.findPayments = (id, message) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT movies.title FROM movies WHERE id = ?",
-      idMovie,
+      "SELECT * FROM payments WHERE id = ?",
+      id,
       (err, result) => {
         if (!err) {
-          resolve(result);
-        } else {
-          reject(new Error("Internal server error"));
-        }
-      }
-    );
-  });
-};
-
-exports.getCinema = (idCinema) => {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      "SELECT cinemas.id FROM cinemas WHERE id = ?",
-      idCinema,
-      (err, result) => {
-        if (!err) {
-          resolve(result);
+          if (result.length == 1) {
+            resolve(result);
+          } else {
+            reject(new Error(`Cannot ${message} payments with id = ${id}`));
+          }
         } else {
           reject(new Error("Internal server error"));
         }

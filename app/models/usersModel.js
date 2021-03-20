@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const connection = require("../configs/dbConfig");
+const helper = require("../helpers/linkPaginate");
 
 exports.getAllUsers = (queryPage, queryPerPage, keyword, sortBy, order) => {
   return new Promise((resolve, reject) => {
@@ -7,7 +8,7 @@ exports.getAllUsers = (queryPage, queryPerPage, keyword, sortBy, order) => {
       "SELECT COUNT(*) AS totalData FROM users WHERE fullName LIKE ? OR username LIKE ? OR email LIKE ?",
       [`%${keyword}%`, `%${keyword}%`, `%${keyword}%`],
       (err, result) => {
-        let totalData, page, perPage, totalPage;
+        let totalData, page, perPage, totalPage, previousPage, nextPage;
         if (err) {
           reject(new Error("Internal server error"));
         } else {
@@ -15,6 +16,17 @@ exports.getAllUsers = (queryPage, queryPerPage, keyword, sortBy, order) => {
           page = queryPage ? parseInt(queryPage) : 1;
           perPage = queryPerPage ? parseInt(queryPerPage) : 5;
           totalPage = Math.ceil(totalData / perPage);
+          const [previous, next] = helper.link(
+            page,
+            perPage,
+            totalPage,
+            keyword,
+            sortBy,
+            order,
+            "users"
+          );
+          previousPage = previous;
+          nextPage = next;
         }
         const firstData = perPage * page - perPage;
         connection.query(
@@ -24,7 +36,15 @@ exports.getAllUsers = (queryPage, queryPerPage, keyword, sortBy, order) => {
             if (err) {
               reject(new Error("Internal server error"));
             } else {
-              resolve([totalData, totalPage, result, page, perPage]);
+              resolve([
+                totalData,
+                totalPage,
+                result,
+                page,
+                perPage,
+                previousPage,
+                nextPage,
+              ]);
             }
           }
         );
@@ -108,6 +128,22 @@ exports.deleteUsers = (id) => {
     connection.query("DELETE FROM users WHERE id = ?", id, (err, result) => {
       if (!err) {
         resolve(result);
+      } else {
+        reject(new Error("Internal server error"));
+      }
+    });
+  });
+};
+
+exports.findUser = (id, message) => {
+  return new Promise((resolve, reject) => {
+    connection.query("SELECT * FROM users WHERE id = ?", id, (err, result) => {
+      if (!err) {
+        if (result.length == 1) {
+          resolve(result);
+        } else {
+          reject(new Error(`Cannot ${message} users with id = ${id}`));
+        }
       } else {
         reject(new Error("Internal server error"));
       }
