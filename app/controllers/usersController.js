@@ -2,6 +2,8 @@ const jwt = require("jsonwebtoken");
 const ip = require("ip");
 const path = require("path");
 const fs = require("fs");
+const redis = require("redis");
+const client = redis.createClient(6379);
 const usersModel = require("../models/usersModel");
 const helper = require("../helpers/printHelper");
 const hash = require("../helpers/hashPassword");
@@ -12,6 +14,7 @@ exports.findAll = (req, res) => {
   const keyword = req.query.keyword ? req.query.keyword : "";
   const sortBy = req.query.sortBy ? req.query.sortBy : "id";
   const order = req.query.order ? req.query.order : "ASC";
+  const url = req.originalUrl;
   usersModel
     .getAllUsers(page, perPage, keyword, sortBy, order)
     .then(
@@ -28,6 +31,20 @@ exports.findAll = (req, res) => {
           helper.printError(res, 400, "Users not found");
           return;
         }
+        client.setex(
+          "getAllUsers",
+          60 * 60 * 12,
+          JSON.stringify({
+            totalData,
+            totalPage,
+            result,
+            page,
+            perPage,
+            previousPage,
+            nextPage,
+            url,
+          })
+        );
         helper.printPaginate(
           res,
           200,

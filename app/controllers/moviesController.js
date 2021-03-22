@@ -1,5 +1,7 @@
 const path = require("path");
 const fs = require("fs");
+const redis = require("redis");
+const client = redis.createClient(6379);
 const moviesModel = require("../models/moviesModel");
 const helper = require("../helpers/printHelper");
 
@@ -8,6 +10,7 @@ exports.findAll = (req, res) => {
   const keyword = req.query.keyword ? req.query.keyword : "";
   const sortBy = req.query.sortBy ? req.query.sortBy : "id";
   const order = req.query.order ? req.query.order : "ASC";
+  const url = req.originalUrl;
   moviesModel
     .getAllMovies(page, perPage, keyword, sortBy, order)
     .then(
@@ -24,6 +27,20 @@ exports.findAll = (req, res) => {
           helper.printError(res, 400, "Movies not found");
           return;
         }
+        client.setex(
+          "getAllMovies",
+          60 * 60 * 12,
+          JSON.stringify({
+            totalData,
+            totalPage,
+            result,
+            page,
+            perPage,
+            previousPage,
+            nextPage,
+            url,
+          })
+        );
         helper.printPaginate(
           res,
           200,

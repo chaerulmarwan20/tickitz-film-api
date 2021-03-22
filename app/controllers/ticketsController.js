@@ -1,3 +1,5 @@
+const redis = require("redis");
+const client = redis.createClient(6379);
 const ticketsModel = require("../models/ticketsModel");
 const helper = require("../helpers/printHelper");
 
@@ -6,6 +8,7 @@ exports.findAll = (req, res) => {
   const keyword = req.query.keyword ? req.query.keyword : "";
   const sortBy = req.query.sortBy ? req.query.sortBy : "id";
   const order = req.query.order ? req.query.order : "ASC";
+  const url = req.originalUrl;
   ticketsModel
     .getAllTickets(page, perPage, keyword, sortBy, order)
     .then(
@@ -22,6 +25,20 @@ exports.findAll = (req, res) => {
           helper.printError(res, 400, "Tickets not found");
           return;
         }
+        client.setex(
+          "getAllTickets",
+          60 * 60 * 12,
+          JSON.stringify({
+            totalData,
+            totalPage,
+            result,
+            page,
+            perPage,
+            previousPage,
+            nextPage,
+            url,
+          })
+        );
         helper.printPaginate(
           res,
           200,

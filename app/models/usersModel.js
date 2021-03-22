@@ -100,23 +100,33 @@ exports.createUsers = (data) => {
 exports.updateUsers = (id, data) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "UPDATE users SET ? WHERE id = ?",
-      [data, id],
+      `SELECT * FROM users WHERE NOT id = ? AND email = ?`,
+      [id, data.email],
       (err, result) => {
-        if (!err) {
+        if (result.length > 0) {
+          reject(new Error("Email has been registered"));
+        } else {
           connection.query(
-            "SELECT * FROM users WHERE id = ?",
-            id,
+            "UPDATE users SET ? WHERE id = ?",
+            [data, id],
             (err, result) => {
               if (!err) {
-                resolve(result);
+                connection.query(
+                  "SELECT * FROM users WHERE id = ?",
+                  id,
+                  (err, result) => {
+                    if (!err) {
+                      resolve(result);
+                    } else {
+                      reject(new Error("Internal server error"));
+                    }
+                  }
+                );
               } else {
                 reject(new Error("Internal server error"));
               }
             }
           );
-        } else {
-          reject(new Error("Internal server error"));
         }
       }
     );
