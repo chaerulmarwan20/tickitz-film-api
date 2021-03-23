@@ -4,7 +4,6 @@ const secretKey = process.env.SECRET_KEY;
 
 exports.verification = () => {
   return function (req, res, next) {
-    const role = req.body.role;
     const authorization = req.headers.authorization;
     if (authorization) {
       const token = authorization.split(" ")[1];
@@ -18,7 +17,8 @@ exports.verification = () => {
             helper.printError(res, 401, "Token is not active");
           }
         } else {
-          if (role == 1) {
+          const role = decoded.role;
+          if (role === 1) {
             req.auth = decoded;
             next();
           } else {

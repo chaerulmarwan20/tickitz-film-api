@@ -6,6 +6,7 @@ const redis = require("redis");
 const client = redis.createClient(6379);
 const usersModel = require("../models/usersModel");
 const helper = require("../helpers/printHelper");
+const mail = require("../helpers/sendEmail");
 const hash = require("../helpers/hashPassword");
 const secretKey = process.env.SECRET_KEY;
 
@@ -140,6 +141,7 @@ exports.create = async (req, res) => {
     password: await hash.hashPassword(password),
     role: 2,
     moviegoers: false,
+    active: false,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -152,7 +154,30 @@ exports.create = async (req, res) => {
         return;
       }
       delete result[0].password;
-      helper.printSuccess(res, 200, "New users has been created", result);
+      const payload = {
+        id: result[0].id,
+        email: result[0].email,
+        firstName: result[0].firstName,
+        lastName: result[0].lastName,
+        fullName: result[0].fullName,
+        phoneNumber: result[0].phoneNumber,
+        role: result[0].role,
+      };
+      jwt.sign(payload, secretKey, { expiresIn: 1440 }, async (err, token) => {
+        const data = {
+          email: result[0].email,
+          token: token,
+          createdAt: new Date(),
+        };
+        await usersModel.createUsersToken(data);
+        await mail.send(result[0].email, token, "verify");
+        helper.printSuccess(
+          res,
+          200,
+          "New users has been created, please activate your email",
+          result
+        );
+      });
     })
     .catch((err) => {
       if (err.message === "Email has been registered") {
@@ -161,6 +186,54 @@ exports.create = async (req, res) => {
         helper.printError(res, 500, err.message);
       }
     });
+};
+
+exports.verify = async (req, res) => {
+  const email = req.query.email;
+  const token = req.query.token;
+
+  try {
+    const user = await usersModel.findEmail(email);
+    if (user < 1) {
+      helper.printError(res, 400, "Email is not valid!");
+      return;
+    } else {
+      try {
+        const userToken = await usersModel.findToken(token);
+        if (userToken < 1) {
+          helper.printError(res, 400, "Token is not valid!");
+          return;
+        } else {
+          jwt.verify(token, secretKey, async (err, decoded) => {
+            if (err) {
+              if (err.name === "JsonWebTokenError") {
+                helper.printError(res, 401, "Invalid signature");
+              } else if (err.name === "TokenExpiredError") {
+                await usersModel.deleteEmail(email);
+                await usersModel.deleteToken(email);
+                helper.printError(res, 401, "Token is expired");
+              } else {
+                helper.printError(res, 401, "Token is not active");
+              }
+            } else {
+              await usersModel.setActive(email);
+              await usersModel.deleteToken(email);
+              helper.printSuccess(
+                res,
+                200,
+                `${email} has been activated, please login!`,
+                decoded
+              );
+            }
+          });
+        }
+      } catch (err) {
+        helper.printError(res, 500, err.message);
+      }
+    }
+  } catch (err) {
+    helper.printError(res, 500, err.message);
+  }
 };
 
 exports.update = async (req, res) => {
@@ -201,6 +274,7 @@ exports.update = async (req, res) => {
     password: await hash.hashPassword(password),
     role: 2,
     moviegoers: false,
+    active: false,
   };
 
   usersModel
@@ -311,10 +385,6 @@ exports.login = (req, res) => {
         helper.printError(res, 500, err.message);
       }
     });
-};
-
-exports.success = (req, res) => {
-  helper.printSuccess(res, 200, "Successfull", req.auth);
 };
 
 exports.moviegoers = (req, res) => {

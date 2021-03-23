@@ -196,25 +196,45 @@ exports.login = (data) => {
         if (err) {
           reject(new Error("Internal server error"));
         } else {
-          if (result.length == 1) {
+          if (result.length === 1) {
             const user = result[0];
-            bcrypt.compare(data.password, result[0].password, (err, result) => {
-              if (err) {
-                reject(new Error("Internal server error"));
-              } else {
-                if (result) {
-                  resolve(user);
-                } else {
-                  reject(new Error("Wrong password"));
+            if (result[0].active === 0) {
+              reject(new Error("Your account not activated"));
+            } else {
+              bcrypt.compare(
+                data.password,
+                result[0].password,
+                (err, result) => {
+                  if (err) {
+                    reject(new Error("Internal server error"));
+                  } else {
+                    if (result) {
+                      resolve(user);
+                    } else {
+                      reject(new Error("Wrong password"));
+                    }
+                  }
                 }
-              }
-            });
+              );
+            }
           } else {
             reject(new Error("Wrong email"));
           }
         }
       }
     );
+  });
+};
+
+exports.createUsersToken = (data) => {
+  return new Promise((resolve, reject) => {
+    connection.query("INSERT INTO user_token SET ?", data, (err, result) => {
+      if (!err) {
+        resolve(result);
+      } else {
+        reject(new Error("Internal server error"));
+      }
+    });
   });
 };
 
@@ -227,5 +247,85 @@ exports.createToken = (data) => {
         reject(new Error("Internal server error"));
       }
     });
+  });
+};
+
+exports.findEmail = (email) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT email FROM users WHERE email = ?",
+      email,
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
+      }
+    );
+  });
+};
+
+exports.findToken = (token) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT token FROM user_token WHERE token = ?",
+      token,
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
+      }
+    );
+  });
+};
+
+exports.deleteEmail = (email) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "DELETE FROM users WHERE email = ?",
+      email,
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
+      }
+    );
+  });
+};
+
+exports.deleteToken = (email) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "DELETE FROM user_token WHERE email = ?",
+      email,
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
+      }
+    );
+  });
+};
+
+exports.setActive = (email) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "UPDATE users SET active = true WHERE email = ?",
+      email,
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
+      }
+    );
   });
 };

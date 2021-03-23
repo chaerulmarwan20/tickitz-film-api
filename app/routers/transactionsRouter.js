@@ -2,11 +2,18 @@ const express = require("express");
 const router = express.Router();
 const transactionsController = require("../controllers/transactionsController");
 const redis = require("../middlewares/redis");
+const auth = require("../middlewares/auth");
 
 router
-  .get("/", redis.allData("getAllTransactions"), transactionsController.findAll)
+  .get(
+    "/",
+    auth.verification(),
+    redis.allData("getAllTransactions"),
+    transactionsController.findAll
+  )
   .get(
     "/:id",
+    auth.verification(),
     redis.oneData("getTransactionsById"),
     transactionsController.findOne
   )
@@ -15,8 +22,8 @@ router
     redis.allData("getAllTransactionsUsers"),
     transactionsController.findUsersTransactions
   )
-  .post("/", transactionsController.create)
-  .put("/:id", transactionsController.update)
-  .delete("/:id", transactionsController.delete);
+  .post("/", auth.verification(), transactionsController.create)
+  .put("/:id", auth.verification(), transactionsController.update)
+  .delete("/:id", auth.verification(), transactionsController.delete);
 
 module.exports = router;
