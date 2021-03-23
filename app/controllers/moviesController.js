@@ -39,6 +39,7 @@ exports.findAll = (req, res) => {
             previousPage,
             nextPage,
             url,
+            message: "Find all movies successfully",
           })
         );
         helper.printPaginate(
@@ -61,27 +62,56 @@ exports.findAll = (req, res) => {
 };
 
 exports.findAllRealesed = (req, res) => {
-  const { page, perPage, realese } = req.query;
+  const { page, perPage } = req.query;
+  const keyword = req.query.keyword ? req.query.keyword : "true";
   const sortBy = req.query.sortBy ? req.query.sortBy : "id";
   const order = req.query.order ? req.query.order : "ASC";
+  const url = req.originalUrl;
   moviesModel
-    .getMoviesRealesed(realese, page, perPage, sortBy, order)
-    .then(([totalData, totalPage, result, page, perPage]) => {
-      if (result < 1) {
-        helper.printError(res, 400, "Movies realesed not found");
-        return;
-      }
-      helper.printPaginate(
-        res,
-        200,
-        "Find all movies realesed successfully",
+    .getMoviesRealesed(keyword, page, perPage, sortBy, order)
+    .then(
+      ([
         totalData,
         totalPage,
         result,
         page,
-        perPage
-      );
-    })
+        perPage,
+        previousPage,
+        nextPage,
+      ]) => {
+        if (result < 1) {
+          helper.printError(res, 400, "Movies realesed not found");
+          return;
+        }
+        client.setex(
+          "getAllMoviesRealesed",
+          60 * 60 * 12,
+          JSON.stringify({
+            totalData,
+            totalPage,
+            result,
+            page,
+            perPage,
+            previousPage,
+            nextPage,
+            url,
+            message: "Find all movies realesed successfully",
+          })
+        );
+        helper.printPaginate(
+          res,
+          200,
+          "Find all movies realesed successfully",
+          totalData,
+          totalPage,
+          result,
+          page,
+          perPage,
+          previousPage,
+          nextPage
+        );
+      }
+    )
     .catch((err) => {
       helper.printError(res, 500, err.message);
     });
@@ -89,6 +119,7 @@ exports.findAllRealesed = (req, res) => {
 
 exports.findOne = (req, res) => {
   const id = req.params.id;
+  const url = req.originalUrl;
 
   const checkId = /^[0-9]+$/;
   if (id.match(checkId) == null) {
@@ -103,6 +134,15 @@ exports.findOne = (req, res) => {
         helper.printError(res, 400, `Cannot find one movies with id = ${id}`);
         return;
       }
+      client.setex(
+        "getMoviesById",
+        60 * 60 * 12,
+        JSON.stringify({
+          result,
+          url,
+          message: "Find one movies successfully",
+        })
+      );
       helper.printSuccess(res, 200, "Find one movies successfully", result);
     })
     .catch((err) => {
@@ -272,27 +312,55 @@ const removeImage = (filePath) => {
 
 exports.searchRealesed = (req, res) => {
   const { page, perPage } = req.query;
-  const keyword = req.body.keyword ? req.body.keyword : "";
+  const keyword = req.query.keyword ? req.query.keyword : "";
   const sortBy = req.query.sortBy ? req.query.sortBy : "id";
   const order = req.query.order ? req.query.order : "ASC";
+  const url = req.originalUrl;
   moviesModel
     .searchMoviesRealese(page, perPage, keyword, sortBy, order)
-    .then(([totalData, totalPage, result, page, perPage]) => {
-      if (result < 1) {
-        helper.printError(res, 400, "Movies not found");
-        return;
-      }
-      helper.printPaginate(
-        res,
-        200,
-        "Search movies successfully",
+    .then(
+      ([
         totalData,
         totalPage,
         result,
         page,
-        perPage
-      );
-    })
+        perPage,
+        previousPage,
+        nextPage,
+      ]) => {
+        if (result < 1) {
+          helper.printError(res, 400, "Movies not found");
+          return;
+        }
+        client.setex(
+          "searchMoviesRealesed",
+          60 * 60 * 12,
+          JSON.stringify({
+            totalData,
+            totalPage,
+            result,
+            page,
+            perPage,
+            previousPage,
+            nextPage,
+            url,
+            message: "Search movies realesed successfully",
+          })
+        );
+        helper.printPaginate(
+          res,
+          200,
+          "Search movies realesed successfully",
+          totalData,
+          totalPage,
+          result,
+          page,
+          perPage,
+          previousPage,
+          nextPage
+        );
+      }
+    )
     .catch((err) => {
       helper.printError(res, 500, err.message);
     });
@@ -300,27 +368,55 @@ exports.searchRealesed = (req, res) => {
 
 exports.searchNotRealesed = (req, res) => {
   const { page, perPage } = req.query;
-  const keyword = req.body.keyword ? req.body.keyword : "";
+  const keyword = req.query.keyword ? req.query.keyword : "";
   const sortBy = req.query.sortBy ? req.query.sortBy : "id";
   const order = req.query.order ? req.query.order : "ASC";
+  const url = req.originalUrl;
   moviesModel
     .searchMoviesNotRealese(page, perPage, keyword, sortBy, order)
-    .then(([totalData, totalPage, result, page, perPage]) => {
-      if (result < 1) {
-        helper.printError(res, 400, "Movies not found");
-        return;
-      }
-      helper.printPaginate(
-        res,
-        200,
-        "Search movies successfully",
+    .then(
+      ([
         totalData,
         totalPage,
         result,
         page,
-        perPage
-      );
-    })
+        perPage,
+        previousPage,
+        nextPage,
+      ]) => {
+        if (result < 1) {
+          helper.printError(res, 400, "Movies not found");
+          return;
+        }
+        client.setex(
+          "searchMoviesNotRealesed",
+          60 * 60 * 12,
+          JSON.stringify({
+            totalData,
+            totalPage,
+            result,
+            page,
+            perPage,
+            previousPage,
+            nextPage,
+            url,
+            message: "Search movies not realesed successfully",
+          })
+        );
+        helper.printPaginate(
+          res,
+          200,
+          "Search movies not realesed successfully",
+          totalData,
+          totalPage,
+          result,
+          page,
+          perPage,
+          previousPage,
+          nextPage
+        );
+      }
+    )
     .catch((err) => {
       helper.printError(res, 500, err.message);
     });

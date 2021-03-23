@@ -6,9 +6,9 @@ const multer = require("../middlewares/multer");
 const redis = require("../middlewares/redis");
 
 router
-  .get("/", redis.allUsers, usersController.findAll)
+  .get("/", redis.allData("getAllUsers"), usersController.findAll)
   .get("/test", auth.verification(), usersController.success)
-  .get("/:id", usersController.findOne)
+  .get("/:id", redis.oneData("getUsersById"), usersController.findOne)
   .post("/", multer.uploadImage.single("image"), usersController.create)
   .put("/moviegoers", usersController.moviegoers)
   .post("/login", usersController.login)

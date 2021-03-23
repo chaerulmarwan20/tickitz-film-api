@@ -4,7 +4,7 @@ const link = `http://${host}:${port}`;
 
 exports.link = (page, perPage, totalPage, keyword, sortBy, order, menu) => {
   let previousPage, nextPage;
-  if ((keyword === "" && sortBy === "id" && order === "ASC") || "asc") {
+  if (keyword === "" && sortBy === "id" && order === "ASC") {
     if (page < totalPage) {
       if (page === 1) {
         previousPage = null;

@@ -5,11 +5,23 @@ const multer = require("../middlewares/multer");
 const redis = require("../middlewares/redis");
 
 router
-  .get("/", redis.allMovies, moviesController.findAll)
-  .get("/realesed", moviesController.findAllRealesed)
-  .post("/search-realese", moviesController.searchRealesed)
-  .post("/search-not-realese", moviesController.searchNotRealesed)
-  .get("/:id", moviesController.findOne)
+  .get("/", redis.allData("getAllMovies"), moviesController.findAll)
+  .get(
+    "/realesed",
+    redis.allData("getAllMoviesRealesed"),
+    moviesController.findAllRealesed
+  )
+  .get(
+    "/search-realese",
+    redis.allData("searchMoviesRealesed"),
+    moviesController.searchRealesed
+  )
+  .get(
+    "/search-not-realese",
+    redis.allData("searchMoviesNotRealesed"),
+    moviesController.searchNotRealesed
+  )
+  .get("/:id", redis.oneData("getMoviesById"), moviesController.findOne)
   .post("/", multer.uploadImage.single("image"), moviesController.create)
   .put("/:id", multer.uploadImage.single("image"), moviesController.update)
   .delete("/:id", moviesController.delete);

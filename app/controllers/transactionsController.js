@@ -37,6 +37,7 @@ exports.findAll = (req, res) => {
             previousPage,
             nextPage,
             url,
+            message: "Find all transactions successfully",
           })
         );
         helper.printPaginate(
@@ -58,35 +59,9 @@ exports.findAll = (req, res) => {
     });
 };
 
-exports.findAllSuccessed = (req, res) => {
-  const { page, perPage } = req.query;
-  const sortBy = req.query.sortBy ? req.query.sortBy : "id";
-  const order = req.query.order ? req.query.order : "ASC";
-  transactionsModel
-    .getTransactionsSuccessed(page, perPage, sortBy, order)
-    .then(([totalData, totalPage, result, page, perPage]) => {
-      if (result < 1) {
-        helper.printError(res, 400, "Transactions successed not found");
-        return;
-      }
-      helper.printPaginate(
-        res,
-        200,
-        "Find all transactions successed successfully",
-        totalData,
-        totalPage,
-        result,
-        page,
-        perPage
-      );
-    })
-    .catch((err) => {
-      helper.printError(res, 500, err.message);
-    });
-};
-
 exports.findOne = (req, res) => {
   const id = req.params.id;
+  const url = req.originalUrl;
 
   const checkId = /^[0-9]+$/;
   if (id.match(checkId) == null) {
@@ -105,6 +80,15 @@ exports.findOne = (req, res) => {
         );
         return;
       }
+      client.setex(
+        "getTransactionsById",
+        60 * 60 * 12,
+        JSON.stringify({
+          result,
+          url,
+          message: "Find one transactions successfully",
+        })
+      );
       helper.printSuccess(
         res,
         200,
@@ -256,37 +240,12 @@ exports.delete = (req, res) => {
     });
 };
 
-exports.search = (req, res) => {
-  const { page, perPage, from, to } = req.query;
-  const sortBy = req.query.sortBy ? req.query.sortBy : "id";
-  const order = req.query.order ? req.query.order : "ASC";
-  transactionsModel
-    .search(page, perPage, from, to, sortBy, order)
-    .then(([totalData, totalPage, result, page, perPage]) => {
-      if (result < 1) {
-        helper.printError(res, 400, "Transactions not found");
-        return;
-      }
-      helper.printPaginate(
-        res,
-        200,
-        `Find transactions from ${from} to ${to} successfully`,
-        totalData,
-        totalPage,
-        result,
-        page,
-        perPage
-      );
-    })
-    .catch((err) => {
-      helper.printError(res, 500, err.message);
-    });
-};
-
 exports.findUsersTransactions = (req, res) => {
   const id = req.params.id;
+  const { page, perPage } = req.query;
   const sortBy = req.query.sortBy ? req.query.sortBy : "id";
   const order = req.query.order ? req.query.order : "ASC";
+  const url = req.originalUrl;
 
   const checkId = /^[0-9]+$/;
   if (id.match(checkId) == null) {
@@ -295,23 +254,54 @@ exports.findUsersTransactions = (req, res) => {
   }
 
   transactionsModel
-    .getTransactionsUsers(id, sortBy, order)
-    .then((result) => {
-      if (result < 1) {
-        helper.printError(
-          res,
-          400,
-          `Cannot find one transactions users with id = ${id}`
+    .getTransactionsUsers(id, page, perPage, sortBy, order)
+    .then(
+      ([
+        totalData,
+        totalPage,
+        result,
+        page,
+        perPage,
+        previousPage,
+        nextPage,
+      ]) => {
+        if (result < 1) {
+          helper.printError(
+            res,
+            400,
+            `Cannot find transactions users with id = ${id}`
+          );
+          return;
+        }
+        client.setex(
+          "getAllTransactionsUsers",
+          60 * 60 * 12,
+          JSON.stringify({
+            totalData,
+            totalPage,
+            result,
+            page,
+            perPage,
+            previousPage,
+            nextPage,
+            url,
+            message: "Find all transactions users successfully",
+          })
         );
-        return;
+        helper.printPaginate(
+          res,
+          200,
+          "Find all transactions users successfully",
+          totalData,
+          totalPage,
+          result,
+          page,
+          perPage,
+          previousPage,
+          nextPage
+        );
       }
-      helper.printSuccess(
-        res,
-        200,
-        "Find one transactions users successfully",
-        result
-      );
-    })
+    )
     .catch((err) => {
       helper.printError(res, 500, err.message);
     });

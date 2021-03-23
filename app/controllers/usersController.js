@@ -31,6 +31,7 @@ exports.findAll = (req, res) => {
           helper.printError(res, 400, "Users not found");
           return;
         }
+        delete result[0].password;
         client.setex(
           "getAllUsers",
           60 * 60 * 12,
@@ -43,6 +44,7 @@ exports.findAll = (req, res) => {
             previousPage,
             nextPage,
             url,
+            message: "Find all users successfully",
           })
         );
         helper.printPaginate(
@@ -66,6 +68,7 @@ exports.findAll = (req, res) => {
 
 exports.findOne = (req, res) => {
   const id = req.params.id;
+  const url = req.originalUrl;
 
   const checkId = /^[0-9]+$/;
   if (id.match(checkId) == null) {
@@ -80,6 +83,16 @@ exports.findOne = (req, res) => {
         helper.printError(res, 400, `Cannot find one users with id = ${id}`);
         return;
       }
+      delete result[0].password;
+      client.setex(
+        "getUsersById",
+        60 * 60 * 12,
+        JSON.stringify({
+          result,
+          url,
+          message: "Find one users successfully",
+        })
+      );
       helper.printSuccess(res, 200, "Find one users successfully", result);
     })
     .catch((err) => {

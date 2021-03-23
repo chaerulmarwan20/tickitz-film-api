@@ -58,38 +58,6 @@ exports.getAllTransactions = (
   });
 };
 
-exports.getTransactionsSuccessed = (queryPage, queryPerPage, sortBy, order) => {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      "SELECT COUNT(*) AS totalData FROM transactions WHERE status = ?",
-      "SUCCESS",
-      (err, result) => {
-        let totalData, page, perPage, totalPage;
-        if (err) {
-          reject(new Error("Internal server error"));
-        } else {
-          totalData = result[0].totalData;
-          page = queryPage ? parseInt(queryPage) : 1;
-          perPage = queryPerPage ? parseInt(queryPerPage) : 5;
-          totalPage = Math.ceil(totalData / perPage);
-        }
-        const firstData = perPage * page - perPage;
-        connection.query(
-          `SELECT transactions.id, transactions.date AS dateTransactions, payments.name AS paymentMethod, users.fullName, users.username, tickets.movieTitle, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.price, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id INNER JOIN payments ON transactions.idPaymentMethod = payments.id) WHERE transactions.status = ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
-          ["SUCCESS", firstData, perPage],
-          (err, result) => {
-            if (err) {
-              reject(new Error("Internal server error"));
-            } else {
-              resolve([totalData, totalPage, result, page, perPage]);
-            }
-          }
-        );
-      }
-    );
-  });
-};
-
 exports.getTransactionsById = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
@@ -218,13 +186,13 @@ exports.getPayment = (idPaymentMethod) => {
   });
 };
 
-exports.search = (queryPage, queryPerPage, from, to, sortBy, order) => {
+exports.getTransactionsUsers = (id, queryPage, queryPerPage, sortBy, order) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT COUNT(*) AS totalData FROM transactions WHERE date BETWEEN ? AND ?",
-      [from, to],
+      "SELECT COUNT(*) AS totalData FROM transactions WHERE transactions.idUser = ?",
+      id,
       (err, result) => {
-        let totalData, page, perPage, totalPage;
+        let totalData, page, perPage, totalPage, previousPage, nextPage;
         if (err) {
           reject(new Error("Internal server error"));
         } else {
@@ -232,35 +200,38 @@ exports.search = (queryPage, queryPerPage, from, to, sortBy, order) => {
           page = queryPage ? parseInt(queryPage) : 1;
           perPage = queryPerPage ? parseInt(queryPerPage) : 5;
           totalPage = Math.ceil(totalData / perPage);
+          const [previous, next] = helper.link(
+            page,
+            perPage,
+            totalPage,
+            "",
+            sortBy,
+            order,
+            `transactions/users/${id}`
+          );
+          previousPage = previous;
+          nextPage = next;
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT transactions.id, transactions.date AS dateTransactions, payments.name AS paymentMethod, users.fullName, users.username, tickets.movieTitle, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.price, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id INNER JOIN payments ON transactions.idPaymentMethod = payments.id) WHERE transactions.date BETWEEN ? AND ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
-          [from, to, firstData, perPage],
+          `SELECT transactions.id, transactions.date AS dateTransactions, payments.name AS paymentMethod, users.fullName, users.username, tickets.movieTitle, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.price, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id INNER JOIN payments ON transactions.idPaymentMethod = payments.id) WHERE transactions.idUser = ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          [id, firstData, perPage],
           (err, result) => {
             if (err) {
               reject(new Error("Internal server error"));
             } else {
-              resolve([totalData, totalPage, result, page, perPage]);
+              resolve([
+                totalData,
+                totalPage,
+                result,
+                page,
+                perPage,
+                previousPage,
+                nextPage,
+              ]);
             }
           }
         );
-      }
-    );
-  });
-};
-
-exports.getTransactionsUsers = (id, sortBy, order) => {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      `SELECT transactions.id, transactions.date AS dateTransactions, payments.name AS paymentMethod, users.fullName, users.username, tickets.movieTitle, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.price, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id INNER JOIN payments ON transactions.idPaymentMethod = payments.id) WHERE transactions.idUser = ? ORDER BY ${sortBy} ${order}`,
-      id,
-      (err, result) => {
-        if (!err) {
-          resolve(result);
-        } else {
-          reject(new Error("Internal server error"));
-        }
       }
     );
   });

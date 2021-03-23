@@ -39,6 +39,7 @@ exports.findAll = (req, res) => {
             previousPage,
             nextPage,
             url,
+            message: "Find all cinemas successfully",
           })
         );
         helper.printPaginate(
@@ -62,6 +63,7 @@ exports.findAll = (req, res) => {
 
 exports.findOne = (req, res) => {
   const id = req.params.id;
+  const url = req.originalUrl;
 
   const checkId = /^[0-9]+$/;
   if (id.match(checkId) == null) {
@@ -76,6 +78,15 @@ exports.findOne = (req, res) => {
         helper.printError(res, 400, `Cannot fine one cinemas with id = ${id}`);
         return;
       }
+      client.setex(
+        "getCinemasById",
+        60 * 60 * 12,
+        JSON.stringify({
+          result,
+          url,
+          message: "Find one cinemas successfully",
+        })
+      );
       helper.printSuccess(res, 200, "Find one cinemas successfully", result);
     })
     .catch((err) => {

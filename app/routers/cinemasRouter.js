@@ -5,8 +5,8 @@ const multer = require("../middlewares/multer");
 const redis = require("../middlewares/redis");
 
 router
-  .get("/", redis.allCinemas, cinemasController.findAll)
-  .get("/:id", cinemasController.findOne)
+  .get("/", redis.allData("getAllCinemas"), cinemasController.findAll)
+  .get("/:id", redis.oneData("getCinemasById"), cinemasController.findOne)
   .post("/", multer.uploadImage.single("image"), cinemasController.create)
   .put("/:id", multer.uploadImage.single("image"), cinemasController.update)
   .delete("/:id", cinemasController.delete);

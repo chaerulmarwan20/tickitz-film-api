@@ -53,16 +53,16 @@ exports.getAllMovies = (queryPage, queryPerPage, keyword, sortBy, order) => {
 };
 
 exports.getMoviesRealesed = (
-  realese,
+  keyword,
   queryPage,
   queryPerPage,
   sortBy,
   order
 ) => {
   let data;
-  if (realese === "true") {
+  if (keyword === "true") {
     data = true;
-  } else {
+  } else if (keyword === "false") {
     data = false;
   }
   return new Promise((resolve, reject) => {
@@ -70,7 +70,7 @@ exports.getMoviesRealesed = (
       "SELECT COUNT(*) AS totalData FROM movies WHERE realesed = ?",
       data,
       (err, result) => {
-        let totalData, page, perPage, totalPage;
+        let totalData, page, perPage, totalPage, previousPage, nextPage;
         if (err) {
           reject(new Error("Internal server error"));
         } else {
@@ -78,6 +78,17 @@ exports.getMoviesRealesed = (
           page = queryPage ? parseInt(queryPage) : 1;
           perPage = queryPerPage ? parseInt(queryPerPage) : 5;
           totalPage = Math.ceil(totalData / perPage);
+          const [previous, next] = helper.link(
+            page,
+            perPage,
+            totalPage,
+            keyword,
+            sortBy,
+            order,
+            "movies/realesed"
+          );
+          previousPage = previous;
+          nextPage = next;
         }
         const firstData = perPage * page - perPage;
         connection.query(
@@ -87,7 +98,15 @@ exports.getMoviesRealesed = (
             if (err) {
               reject(new Error("Internal server error"));
             } else {
-              resolve([totalData, totalPage, result, page, perPage]);
+              resolve([
+                totalData,
+                totalPage,
+                result,
+                page,
+                perPage,
+                previousPage,
+                nextPage,
+              ]);
             }
           }
         );
@@ -196,7 +215,7 @@ exports.searchMoviesRealese = (
       "SELECT COUNT(*) AS totalData FROM movies WHERE title LIKE ? AND realesed = true",
       `%${keyword}%`,
       (err, result) => {
-        let totalData, page, perPage, totalPage;
+        let totalData, page, perPage, totalPage, previousPage, nextPage;
         if (err) {
           reject(new Error("Internal server error"));
         } else {
@@ -204,6 +223,17 @@ exports.searchMoviesRealese = (
           page = queryPage ? parseInt(queryPage) : 1;
           perPage = queryPerPage ? parseInt(queryPerPage) : 5;
           totalPage = Math.ceil(totalData / perPage);
+          const [previous, next] = helper.link(
+            page,
+            perPage,
+            totalPage,
+            keyword,
+            sortBy,
+            order,
+            "movies/search-realese"
+          );
+          previousPage = previous;
+          nextPage = next;
         }
         const firstData = perPage * page - perPage;
         connection.query(
@@ -213,7 +243,15 @@ exports.searchMoviesRealese = (
             if (err) {
               reject(new Error("Internal server error"));
             } else {
-              resolve([totalData, totalPage, result, page, perPage]);
+              resolve([
+                totalData,
+                totalPage,
+                result,
+                page,
+                perPage,
+                previousPage,
+                nextPage,
+              ]);
             }
           }
         );
@@ -234,7 +272,7 @@ exports.searchMoviesNotRealese = (
       "SELECT COUNT(*) AS totalData FROM movies WHERE title LIKE ? AND realesed = false",
       `%${keyword}%`,
       (err, result) => {
-        let totalData, page, perPage, totalPage;
+        let totalData, page, perPage, totalPage, previousPage, nextPage;
         if (err) {
           reject(new Error("Internal server error"));
         } else {
@@ -242,6 +280,17 @@ exports.searchMoviesNotRealese = (
           page = queryPage ? parseInt(queryPage) : 1;
           perPage = queryPerPage ? parseInt(queryPerPage) : 5;
           totalPage = Math.ceil(totalData / perPage);
+          const [previous, next] = helper.link(
+            page,
+            perPage,
+            totalPage,
+            keyword,
+            sortBy,
+            order,
+            "movies/search-not-realese"
+          );
+          previousPage = previous;
+          nextPage = next;
         }
         const firstData = perPage * page - perPage;
         connection.query(
@@ -251,7 +300,15 @@ exports.searchMoviesNotRealese = (
             if (err) {
               reject(new Error("Internal server error"));
             } else {
-              resolve([totalData, totalPage, result, page, perPage]);
+              resolve([
+                totalData,
+                totalPage,
+                result,
+                page,
+                perPage,
+                previousPage,
+                nextPage,
+              ]);
             }
           }
         );

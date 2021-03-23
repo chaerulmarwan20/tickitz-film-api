@@ -4,8 +4,8 @@ const citiesController = require("../controllers/citiesController");
 const redis = require("../middlewares/redis");
 
 router
-  .get("/", redis.allCities, citiesController.findAll)
-  .get("/:id", citiesController.findOne)
+  .get("/", redis.allData("getAllCities"), citiesController.findAll)
+  .get("/:id", redis.oneData("getCitiesById"), citiesController.findOne)
   .post("/", citiesController.create)
   .put("/:id", citiesController.update)
   .delete("/:id", citiesController.delete);
