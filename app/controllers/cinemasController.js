@@ -1,7 +1,8 @@
 const path = require("path");
 const fs = require("fs");
 const redis = require("redis");
-const client = redis.createClient(6379);
+const port = process.env.REDIS_PORT;
+const client = redis.createClient(port);
 const cinemasModel = require("../models/cinemasModel");
 const helper = require("../helpers/printHelper");
 

@@ -1,5 +1,6 @@
+const port = process.env.REDIS_PORT;
 const redis = require("redis");
-const client = redis.createClient(6379);
+const client = redis.createClient(port);
 const helper = require("../helpers/printHelper");
 
 const cacheAllData = (params) => {

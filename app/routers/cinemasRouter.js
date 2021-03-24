@@ -6,20 +6,37 @@ const redis = require("../middlewares/redis");
 const auth = require("../middlewares/auth");
 
 router
-  .get("/", redis.allData("getAllCinemas"), cinemasController.findAll)
-  .get("/:id", redis.oneData("getCinemasById"), cinemasController.findOne)
+  .get(
+    "/",
+    auth.verification(),
+    redis.allData("getAllCinemas"),
+    cinemasController.findAll
+  )
+  .get(
+    "/:id",
+    auth.verification(),
+    redis.oneData("getCinemasById"),
+    cinemasController.findOne
+  )
   .post(
     "/",
     auth.verification(),
+    auth.isAdmin(),
     multer.uploadImage.single("image"),
     cinemasController.create
   )
   .put(
     "/:id",
     auth.verification(),
+    auth.isAdmin(),
     multer.uploadImage.single("image"),
     cinemasController.update
   )
-  .delete("/:id", auth.verification(), cinemasController.delete);
+  .delete(
+    "/:id",
+    auth.verification(),
+    auth.isAdmin(),
+    cinemasController.delete
+  );
 
 module.exports = router;

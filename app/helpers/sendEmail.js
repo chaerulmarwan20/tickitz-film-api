@@ -18,8 +18,16 @@ const send = (destination, token, type) => {
         const info = await transporter.sendMail({
           from: "chaerulmarwanjr7@gmail.com",
           to: destination,
-          subject: "Account verification",
+          subject: "Account Verification",
           html: `Click this link to verify your account : <a href="${link}/v1/users/auth/verify/?email=${destination}&token=${token}">Activate</a>`,
+        });
+        resolve(info);
+      } else if (type === "forgot") {
+        const info = await transporter.sendMail({
+          from: "chaerulmarwanjr7@gmail.com",
+          to: destination,
+          subject: "Reset Password",
+          html: `Click this link to reset your password : <a href="${link}/v1/users/auth/reset-password/?email=${destination}&token=${token}">Reset Password</a>`,
         });
         resolve(info);
       }

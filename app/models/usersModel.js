@@ -329,3 +329,35 @@ exports.setActive = (email) => {
     );
   });
 };
+
+exports.findAccount = (data) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT * FROM users WHERE email = ? AND active = true",
+      data,
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
+      }
+    );
+  });
+};
+
+exports.setPassword = (password, email) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "UPDATE users SET password = ? WHERE email = ?",
+      [password, email],
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
+      }
+    );
+  });
+};

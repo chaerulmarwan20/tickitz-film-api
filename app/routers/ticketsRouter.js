@@ -5,10 +5,25 @@ const redis = require("../middlewares/redis");
 const auth = require("../middlewares/auth");
 
 router
-  .get("/", redis.allData("getAllTickets"), ticketsController.findAll)
-  .get("/:id", redis.oneData("getTicketsById"), ticketsController.findOne)
-  .post("/", auth.verification(), ticketsController.create)
-  .put("/:id", auth.verification(), ticketsController.update)
-  .delete("/:id", auth.verification(), ticketsController.delete);
+  .get(
+    "/",
+    auth.verification(),
+    redis.allData("getAllTickets"),
+    ticketsController.findAll
+  )
+  .get(
+    "/:id",
+    auth.verification(),
+    redis.oneData("getTicketsById"),
+    ticketsController.findOne
+  )
+  .post("/", auth.verification(), auth.isAdmin(), ticketsController.create)
+  .put("/:id", auth.verification(), auth.isAdmin(), ticketsController.update)
+  .delete(
+    "/:id",
+    auth.verification(),
+    auth.isAdmin(),
+    ticketsController.delete
+  );
 
 module.exports = router;

@@ -6,20 +6,37 @@ const redis = require("../middlewares/redis");
 const auth = require("../middlewares/auth");
 
 router
-  .get("/", redis.allData("getAllPayments"), paymentsController.findAll)
-  .get("/:id", redis.oneData("getPaymentsById"), paymentsController.findOne)
+  .get(
+    "/",
+    auth.verification(),
+    redis.allData("getAllPayments"),
+    paymentsController.findAll
+  )
+  .get(
+    "/:id",
+    auth.verification(),
+    redis.oneData("getPaymentsById"),
+    paymentsController.findOne
+  )
   .post(
     "/",
     auth.verification(),
+    auth.isAdmin(),
     multer.uploadImage.single("image"),
     paymentsController.create
   )
   .put(
     "/:id",
     auth.verification(),
+    auth.isAdmin(),
     multer.uploadImage.single("image"),
     paymentsController.update
   )
-  .delete("/:id", auth.verification(), paymentsController.delete);
+  .delete(
+    "/:id",
+    auth.verification(),
+    auth.isAdmin(),
+    paymentsController.delete
+  );
 
 module.exports = router;

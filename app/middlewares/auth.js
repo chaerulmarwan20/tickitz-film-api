@@ -17,17 +17,23 @@ exports.verification = () => {
             helper.printError(res, 401, "Token is not active");
           }
         } else {
-          const role = decoded.role;
-          if (role === 1) {
-            req.auth = decoded;
-            next();
-          } else {
-            helper.printError(res, 401, "Failed to authorize your role");
-          }
+          req.auth = decoded;
+          next();
         }
       });
     } else {
       helper.printError(res, 401, "Token is required");
+    }
+  };
+};
+
+exports.isAdmin = () => {
+  return function (req, res, next) {
+    const role = req.auth.role;
+    if (role === 1) {
+      next();
+    } else {
+      helper.printError(res, 401, "Failed to authorize your role");
     }
   };
 };

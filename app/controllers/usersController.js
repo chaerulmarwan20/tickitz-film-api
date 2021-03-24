@@ -3,7 +3,8 @@ const ip = require("ip");
 const path = require("path");
 const fs = require("fs");
 const redis = require("redis");
-const client = redis.createClient(6379);
+const port = process.env.REDIS_PORT;
+const client = redis.createClient(port);
 const usersModel = require("../models/usersModel");
 const helper = require("../helpers/printHelper");
 const mail = require("../helpers/sendEmail");
@@ -385,6 +386,105 @@ exports.login = (req, res) => {
         helper.printError(res, 500, err.message);
       }
     });
+};
+
+exports.forgotPassword = (req, res) => {
+  const email = req.body.email;
+
+  if (!email) {
+    helper.printError(res, 400, "Content cannot be empty");
+    return;
+  }
+
+  const data = email;
+
+  usersModel
+    .findAccount(data)
+    .then((result) => {
+      if (result.length < 1) {
+        helper.printError(res, 400, "Email is not registered or activated!");
+        return;
+      }
+      const payload = {
+        id: result[0].id,
+        email: result[0].email,
+        firstName: result[0].firstName,
+        lastName: result[0].lastName,
+        fullName: result[0].fullName,
+        phoneNumber: result[0].phoneNumber,
+        role: result[0].role,
+      };
+      jwt.sign(payload, secretKey, { expiresIn: 1440 }, async (err, token) => {
+        const data = {
+          email: result[0].email,
+          token: token,
+          createdAt: new Date(),
+        };
+        await usersModel.createUsersToken(data);
+        await mail.send(result[0].email, token, "forgot");
+        helper.printSuccess(
+          res,
+          200,
+          "Please check your email to reset your password!",
+          result
+        );
+      });
+    })
+    .catch((err) => {
+      helper.printError(res, 500, err.message);
+    });
+};
+
+exports.resetPassword = async (req, res) => {
+  const email = req.query.email;
+  const token = req.query.token;
+  const password = req.body.password;
+
+  try {
+    const user = await usersModel.findEmail(email);
+    if (user < 1) {
+      helper.printError(res, 400, "Reset password failed! Wrong email.");
+      return;
+    } else {
+      try {
+        const userToken = await usersModel.findToken(token);
+        if (userToken < 1) {
+          helper.printError(res, 400, "Reset password failed! Wrong token.");
+          return;
+        } else {
+          jwt.verify(token, secretKey, async (err, decoded) => {
+            if (err) {
+              if (err.name === "JsonWebTokenError") {
+                helper.printError(res, 401, "Invalid signature");
+              } else if (err.name === "TokenExpiredError") {
+                await usersModel.deleteToken(email);
+                helper.printError(res, 401, "Token is expired");
+              } else {
+                helper.printError(res, 401, "Token is not active");
+              }
+            } else {
+              const data = await hash.hashPassword(password);
+              await usersModel.setPassword(data, email);
+              if (!data) {
+                helper.printError(res, 400, "Content cannot be empty");
+                return;
+              }
+              helper.printSuccess(
+                res,
+                200,
+                "Password has been changed! Please login.",
+                decoded
+              );
+            }
+          });
+        }
+      } catch (err) {
+        helper.printError(res, 500, err.message);
+      }
+    }
+  } catch (err) {
+    helper.printError(res, 500, err.message);
+  }
 };
 
 exports.moviegoers = (req, res) => {

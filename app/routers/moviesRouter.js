@@ -6,9 +6,15 @@ const redis = require("../middlewares/redis");
 const auth = require("../middlewares/auth");
 
 router
-  .get("/", redis.allData("getAllMovies"), moviesController.findAll)
+  .get(
+    "/",
+    auth.verification(),
+    redis.allData("getAllMovies"),
+    moviesController.findAll
+  )
   .get(
     "/realesed",
+    auth.verification(),
     redis.allData("getAllMoviesRealesed"),
     moviesController.findAllRealesed
   )
@@ -22,19 +28,26 @@ router
     redis.allData("searchMoviesNotRealesed"),
     moviesController.searchNotRealesed
   )
-  .get("/:id", redis.oneData("getMoviesById"), moviesController.findOne)
+  .get(
+    "/:id",
+    auth.verification(),
+    redis.oneData("getMoviesById"),
+    moviesController.findOne
+  )
   .post(
     "/",
     auth.verification(),
+    auth.isAdmin(),
     multer.uploadImage.single("image"),
     moviesController.create
   )
   .put(
     "/:id",
     auth.verification(),
+    auth.isAdmin(),
     multer.uploadImage.single("image"),
     moviesController.update
   )
-  .delete("/:id", auth.verification(), moviesController.delete);
+  .delete("/:id", auth.verification(), auth.isAdmin(), moviesController.delete);
 
 module.exports = router;
