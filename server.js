@@ -2,6 +2,7 @@ require("dotenv").config();
 
 // Port
 const port = process.env.PORT;
+const host = process.env.HOST;
 
 // Package
 const express = require("express");
@@ -53,5 +54,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on http://${host}:${port}`);
 });
