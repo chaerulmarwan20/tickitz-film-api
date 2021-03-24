@@ -164,7 +164,7 @@ exports.create = async (req, res) => {
         phoneNumber: result[0].phoneNumber,
         role: result[0].role,
       };
-      jwt.sign(payload, secretKey, { expiresIn: 1440 }, async (err, token) => {
+      jwt.sign(payload, secretKey, { expiresIn: "24h" }, async (err, token) => {
         const data = {
           email: result[0].email,
           token: token,
@@ -368,7 +368,7 @@ exports.login = (req, res) => {
         phoneNumber: result.phoneNumber,
         role: result.role,
       };
-      jwt.sign(payload, secretKey, { expiresIn: 1440 }, async (err, token) => {
+      jwt.sign(payload, secretKey, { expiresIn: "24h" }, async (err, token) => {
         result.token = token;
         const data = {
           idUser: result.id,
@@ -414,7 +414,7 @@ exports.forgotPassword = (req, res) => {
         phoneNumber: result[0].phoneNumber,
         role: result[0].role,
       };
-      jwt.sign(payload, secretKey, { expiresIn: 1440 }, async (err, token) => {
+      jwt.sign(payload, secretKey, { expiresIn: "24h" }, async (err, token) => {
         const data = {
           email: result[0].email,
           token: token,
