@@ -154,7 +154,6 @@ exports.create = async (req, res) => {
         helper.printError(res, 400, "Error creating users");
         return;
       }
-      delete result[0].password;
       const payload = {
         id: result[0].id,
         email: result[0].email,
