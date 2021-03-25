@@ -33,7 +33,13 @@ exports.findAll = (req, res) => {
           helper.printError(res, 400, "Users not found");
           return;
         }
-        delete result[0].password;
+        for (let i = 0; i < perPage; i++) {
+          if (result[i] === undefined) {
+            break;
+          } else {
+            delete result[i].password;
+          }
+        }
         client.setex(
           "getAllUsers",
           60 * 60 * 12,
@@ -154,6 +160,7 @@ exports.create = async (req, res) => {
         helper.printError(res, 400, "Error creating users");
         return;
       }
+      delete result[0].password;
       const payload = {
         id: result[0].id,
         email: result[0].email,
