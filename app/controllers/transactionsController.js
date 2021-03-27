@@ -103,9 +103,9 @@ exports.findOne = (req, res) => {
 };
 
 exports.create = async (req, res) => {
-  const { idPaymentMethod, idUser, idTicket, qty, total } = req.body;
+  const { idPaymentMethod, idUser, idTicket, idCinema, qty, total } = req.body;
 
-  if (!idPaymentMethod || !idUser || !idTicket || !qty || !total) {
+  if (!idPaymentMethod || !idUser || !idTicket || !idCinema || !qty || !total) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   }
@@ -114,11 +114,12 @@ exports.create = async (req, res) => {
     const getPayment = await transactionsModel.getPayment(idPaymentMethod);
     const getUser = await transactionsModel.getUser(idUser);
     const getTicket = await transactionsModel.getTicket(idTicket);
-    if (getTicket < 1 || getUser < 1 || getPayment < 1) {
+    const getCinema = await transactionsModel.getCinema(idCinema);
+    if (getTicket < 1 || getUser < 1 || getPayment < 1 || getCinema < 1) {
       helper.printError(
         res,
         400,
-        "Id payment method or user or ticket not found!"
+        "Id payment method or user or ticket or cinema not found!"
       );
       return;
     }
@@ -131,6 +132,7 @@ exports.create = async (req, res) => {
     idPaymentMethod,
     idUser,
     idTicket,
+    idCinema,
     qty,
     total,
     status: "PENDING",
@@ -161,9 +163,25 @@ exports.update = async (req, res) => {
   const id = req.params.id;
   const checkId = /^[0-9]+$/;
 
-  const { idPaymentMethod, idUser, idTicket, qty, total, status } = req.body;
+  const {
+    idPaymentMethod,
+    idUser,
+    idTicket,
+    idCinema,
+    qty,
+    total,
+    status,
+  } = req.body;
 
-  if (!idPaymentMethod || !idUser || !idTicket || !qty || !total || !status) {
+  if (
+    !idPaymentMethod ||
+    !idUser ||
+    !idTicket ||
+    !idCinema ||
+    !qty ||
+    !total ||
+    !status
+  ) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   } else if (id.match(checkId) == null) {
@@ -175,11 +193,12 @@ exports.update = async (req, res) => {
     const getPayment = await transactionsModel.getPayment(idPaymentMethod);
     const getUser = await transactionsModel.getUser(idUser);
     const getTicket = await transactionsModel.getTicket(idTicket);
-    if (getTicket < 1 || getUser < 1 || getPayment < 1) {
+    const getCinema = await transactionsModel.getCinema(idCinema);
+    if (getTicket < 1 || getUser < 1 || getPayment < 1 || getCinema < 1) {
       helper.printError(
         res,
         400,
-        "Id payment method or user or ticket not found!"
+        "Id payment method or user or ticket or cinema not found!"
       );
       return;
     }
@@ -191,6 +210,7 @@ exports.update = async (req, res) => {
     idPaymentMethod,
     idUser,
     idTicket,
+    idCinema,
     qty,
     total,
     status,

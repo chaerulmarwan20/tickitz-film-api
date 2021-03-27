@@ -311,14 +311,14 @@ const removeImage = (filePath) => {
   fs.unlink(filePath, (err) => new Error(err));
 };
 
-exports.searchRealesed = (req, res) => {
+exports.isRealesed = (req, res) => {
   const { page, perPage } = req.query;
   const keyword = req.query.keyword ? req.query.keyword : "";
   const sortBy = req.query.sortBy ? req.query.sortBy : "id";
   const order = req.query.order ? req.query.order : "ASC";
   const url = req.originalUrl;
   moviesModel
-    .searchMoviesRealese(page, perPage, keyword, sortBy, order)
+    .isMoviesRealese(page, perPage, keyword, sortBy, order)
     .then(
       ([
         totalData,
@@ -334,7 +334,7 @@ exports.searchRealesed = (req, res) => {
           return;
         }
         client.setex(
-          "searchMoviesRealesed",
+          "isMoviesRealesed",
           60 * 60 * 12,
           JSON.stringify({
             totalData,
@@ -345,13 +345,13 @@ exports.searchRealesed = (req, res) => {
             previousPage,
             nextPage,
             url,
-            message: "Search movies realesed successfully",
+            message: "Find movies realesed successfully",
           })
         );
         helper.printPaginate(
           res,
           200,
-          "Search movies realesed successfully",
+          "Find movies realesed successfully",
           totalData,
           totalPage,
           result,
@@ -367,14 +367,14 @@ exports.searchRealesed = (req, res) => {
     });
 };
 
-exports.searchNotRealesed = (req, res) => {
+exports.isNotRealesed = (req, res) => {
   const { page, perPage } = req.query;
   const keyword = req.query.keyword ? req.query.keyword : "";
   const sortBy = req.query.sortBy ? req.query.sortBy : "id";
   const order = req.query.order ? req.query.order : "ASC";
   const url = req.originalUrl;
   moviesModel
-    .searchMoviesNotRealese(page, perPage, keyword, sortBy, order)
+    .isMoviesNotRealese(page, perPage, keyword, sortBy, order)
     .then(
       ([
         totalData,
@@ -390,7 +390,7 @@ exports.searchNotRealesed = (req, res) => {
           return;
         }
         client.setex(
-          "searchMoviesNotRealesed",
+          "isMoviesNotRealesed",
           60 * 60 * 12,
           JSON.stringify({
             totalData,
@@ -401,13 +401,13 @@ exports.searchNotRealesed = (req, res) => {
             previousPage,
             nextPage,
             url,
-            message: "Search movies not realesed successfully",
+            message: "Find movies not realesed successfully",
           })
         );
         helper.printPaginate(
           res,
           200,
-          "Search movies not realesed successfully",
+          "Find movies not realesed successfully",
           totalData,
           totalPage,
           result,

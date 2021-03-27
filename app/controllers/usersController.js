@@ -116,23 +116,9 @@ exports.create = async (req, res) => {
     image = req.file.path;
   }
 
-  const {
-    firstName,
-    lastName,
-    phoneNumber,
-    username,
-    email,
-    password,
-  } = req.body;
+  const { firstName, lastName, phoneNumber, email, password } = req.body;
 
-  if (
-    !firstName ||
-    !lastName ||
-    !phoneNumber ||
-    !username ||
-    !email ||
-    !password
-  ) {
+  if (!firstName || !lastName || !phoneNumber || !email || !password) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   }
@@ -143,7 +129,6 @@ exports.create = async (req, res) => {
     fullName: firstName + " " + lastName,
     image,
     phoneNumber,
-    username,
     email,
     password: await hash.hashPassword(password),
     role: 2,
@@ -181,7 +166,7 @@ exports.create = async (req, res) => {
         helper.printSuccess(
           res,
           200,
-          "New users has been created, please activate your email",
+          "Your account has been created, please check your email to activate your account",
           result
         );
       });
@@ -247,23 +232,9 @@ exports.update = async (req, res) => {
   const id = req.params.id;
   const checkId = /^[0-9]+$/;
 
-  const {
-    firstName,
-    lastName,
-    phoneNumber,
-    username,
-    email,
-    password,
-  } = req.body;
+  const { firstName, lastName, phoneNumber, email, password } = req.body;
 
-  if (
-    !firstName ||
-    !lastName ||
-    !phoneNumber ||
-    !username ||
-    !email ||
-    !password
-  ) {
+  if (!firstName || !lastName || !phoneNumber || !email || !password) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   } else if (id.match(checkId) == null) {
@@ -276,12 +247,8 @@ exports.update = async (req, res) => {
     lastName,
     fullName: firstName + " " + lastName,
     phoneNumber,
-    username,
     email,
     password: await hash.hashPassword(password),
-    role: 2,
-    moviegoers: false,
-    active: false,
   };
 
   usersModel
@@ -493,11 +460,22 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
-exports.moviegoers = (req, res) => {
+exports.moviegoers = async (req, res) => {
   const email = req.body.email;
 
   if (!email) {
     helper.printError(res, 400, "Content cannot be empty");
+    return;
+  }
+
+  try {
+    const moviegoers = await usersModel.checkMoviegoers(email);
+    if (moviegoers.length > 0) {
+      helper.printError(res, 200, "Your account has become moviegoers");
+      return;
+    }
+  } catch (err) {
+    helper.printError(res, 500, err.message);
     return;
   }
 

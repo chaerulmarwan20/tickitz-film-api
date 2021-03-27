@@ -5,12 +5,7 @@ const redis = require("../middlewares/redis");
 const auth = require("../middlewares/auth");
 
 router
-  .get(
-    "/",
-    auth.verification(),
-    redis.allData("getAllCities"),
-    citiesController.findAll
-  )
+  .get("/", redis.allData("getAllCities"), citiesController.findAll)
   .get(
     "/:id",
     auth.verification(),

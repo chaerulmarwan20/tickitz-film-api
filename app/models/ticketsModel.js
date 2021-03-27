@@ -143,19 +143,3 @@ exports.getMovieTitle = (idMovie) => {
     );
   });
 };
-
-exports.getCinema = (idCinema) => {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      "SELECT cinemas.id FROM cinemas WHERE id = ?",
-      idCinema,
-      (err, result) => {
-        if (!err) {
-          resolve(result);
-        } else {
-          reject(new Error("Internal server error"));
-        }
-      }
-    );
-  });
-};

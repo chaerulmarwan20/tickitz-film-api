@@ -94,9 +94,9 @@ exports.findOne = (req, res) => {
 };
 
 exports.create = async (req, res) => {
-  const { day, row, seat, price, qty, idMovie, idCinema } = req.body;
+  const { day, row, seat, price, qty, idMovie } = req.body;
 
-  if (!day || !row || !seat || !price || !qty || !idMovie || !idCinema) {
+  if (!day || !row || !seat || !price || !qty || !idMovie) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   }
@@ -104,8 +104,7 @@ exports.create = async (req, res) => {
   let titleMovie;
   try {
     const getTitle = await ticketsModel.getMovieTitle(idMovie);
-    const getCinema = await ticketsModel.getCinema(idCinema);
-    if (getTitle < 1 || getCinema < 1) {
+    if (getTitle < 1) {
       helper.printError(res, 400, "Id movie or cinema not found!");
       return;
     }
@@ -122,7 +121,6 @@ exports.create = async (req, res) => {
     price,
     qty,
     idMovie,
-    idCinema,
     date: new Date(),
     time: new Date(),
     createdAt: new Date(),
@@ -147,9 +145,9 @@ exports.update = async (req, res) => {
   const id = req.params.id;
   const checkId = /^[0-9]+$/;
 
-  const { day, row, seat, price, qty, idMovie, idCinema } = req.body;
+  const { day, row, seat, price, qty, idMovie } = req.body;
 
-  if (!day || !row || !seat || !price || !qty || !idMovie || !idCinema) {
+  if (!day || !row || !seat || !price || !qty || !idMovie) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   } else if (id.match(checkId) == null) {
@@ -160,8 +158,7 @@ exports.update = async (req, res) => {
   let titleMovie;
   try {
     const getTitle = await ticketsModel.getMovieTitle(idMovie);
-    const getCinema = await ticketsModel.getCinema(idCinema);
-    if (getTitle < 1 || getCinema < 1) {
+    if (getTitle < 1) {
       helper.printError(res, 400, "Id movie or cinema not found!");
       return;
     }
@@ -178,7 +175,6 @@ exports.update = async (req, res) => {
     price,
     qty,
     idMovie,
-    idCinema,
   };
 
   ticketsModel

@@ -203,13 +203,7 @@ exports.findMovies = (id, message) => {
   });
 };
 
-exports.searchMoviesRealese = (
-  queryPage,
-  queryPerPage,
-  keyword,
-  sortBy,
-  order
-) => {
+exports.isMoviesRealese = (queryPage, queryPerPage, keyword, sortBy, order) => {
   return new Promise((resolve, reject) => {
     connection.query(
       "SELECT COUNT(*) AS totalData FROM movies WHERE title LIKE ? AND realesed = true",
@@ -230,7 +224,7 @@ exports.searchMoviesRealese = (
             keyword,
             sortBy,
             order,
-            "movies/search-realese"
+            "movies/is-realese"
           );
           previousPage = previous;
           nextPage = next;
@@ -260,7 +254,7 @@ exports.searchMoviesRealese = (
   });
 };
 
-exports.searchMoviesNotRealese = (
+exports.isMoviesNotRealese = (
   queryPage,
   queryPerPage,
   keyword,
@@ -287,7 +281,7 @@ exports.searchMoviesNotRealese = (
             keyword,
             sortBy,
             order,
-            "movies/search-not-realese"
+            "movies/is-not-realese"
           );
           previousPage = previous;
           nextPage = next;

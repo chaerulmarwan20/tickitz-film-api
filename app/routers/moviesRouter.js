@@ -14,19 +14,18 @@ router
   )
   .get(
     "/realesed",
-    auth.verification(),
     redis.allData("getAllMoviesRealesed"),
     moviesController.findAllRealesed
   )
   .get(
-    "/search-realese",
-    redis.allData("searchMoviesRealesed"),
-    moviesController.searchRealesed
+    "/is-realese",
+    redis.allData("isMoviesRealesed"),
+    moviesController.isRealesed
   )
   .get(
-    "/search-not-realese",
-    redis.allData("searchMoviesNotRealesed"),
-    moviesController.searchNotRealesed
+    "/is-not-realese",
+    redis.allData("isMoviesNotRealesed"),
+    moviesController.isNotRealesed
   )
   .get(
     "/:id",

@@ -361,3 +361,19 @@ exports.setPassword = (password, email) => {
     );
   });
 };
+
+exports.checkMoviegoers = (email) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT moviegoers FROM users WHERE email = ? AND moviegoers = true",
+      email,
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
+      }
+    );
+  });
+};
