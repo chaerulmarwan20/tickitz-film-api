@@ -377,3 +377,19 @@ exports.checkMoviegoers = (email) => {
     );
   });
 };
+
+exports.checkPassword = (password) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT password FROM users WHERE password = ?",
+      password,
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
+      }
+    );
+  });
+};

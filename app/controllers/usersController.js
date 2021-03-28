@@ -91,7 +91,6 @@ exports.findOne = (req, res) => {
         helper.printError(res, 400, `Cannot find one users with id = ${id}`);
         return;
       }
-      delete result[0].password;
       client.setex(
         "getUsersById",
         60 * 60 * 12,
@@ -234,7 +233,7 @@ exports.update = async (req, res) => {
 
   const { firstName, lastName, phoneNumber, email, password } = req.body;
 
-  if (!firstName || !lastName || !phoneNumber || !email || !password) {
+  if (!firstName || !lastName || !phoneNumber || !email) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   } else if (id.match(checkId) == null) {
@@ -248,8 +247,17 @@ exports.update = async (req, res) => {
     fullName: firstName + " " + lastName,
     phoneNumber,
     email,
-    password: await hash.hashPassword(password),
   };
+
+  try {
+    const userPassword = await usersModel.checkPassword(password);
+    if (userPassword.length < 1) {
+      data.password = await hash.hashPassword(password);
+    }
+  } catch (err) {
+    helper.printError(res, 400, err.message);
+    return;
+  }
 
   usersModel
     .findUser(id, "update")
