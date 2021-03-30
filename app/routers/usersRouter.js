@@ -18,6 +18,7 @@ router
   .get("/auth/verify", usersController.verify)
   .put("/moviegoers", auth.verification(), usersController.moviegoers)
   .post("/auth/login", usersController.login)
+  .post("/auth/check-email", usersController.checkEmail)
   .post("/auth/forgot-password", usersController.forgotPassword)
   .put("/auth/reset-password", usersController.resetPassword)
   .put("/:id", multer.uploadImage.single("image"), usersController.update)

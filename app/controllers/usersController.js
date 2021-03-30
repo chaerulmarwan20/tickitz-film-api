@@ -369,6 +369,35 @@ exports.login = (req, res) => {
     });
 };
 
+exports.checkEmail = (req, res) => {
+  const email = req.body.email;
+
+  if (!email) {
+    helper.printError(res, 400, "Content cannot be empty");
+    return;
+  }
+
+  const data = email;
+
+  usersModel
+    .findEmail(data)
+    .then((result) => {
+      if (result.length < 1) {
+        helper.printError(res, 400, "Email is not registered!");
+        return;
+      }
+      helper.printSuccess(
+        res,
+        200,
+        "Please follow next step to reset your password!",
+        result
+      );
+    })
+    .catch((err) => {
+      helper.printError(res, 500, err.message);
+    });
+};
+
 exports.forgotPassword = (req, res) => {
   const email = req.body.email;
 
@@ -386,6 +415,7 @@ exports.forgotPassword = (req, res) => {
         helper.printError(res, 400, "Email is not registered or activated!");
         return;
       }
+      delete result[0].password;
       const payload = {
         id: result[0].id,
         email: result[0].email,
