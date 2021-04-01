@@ -127,6 +127,22 @@ exports.getMoviesById = (id) => {
   });
 };
 
+exports.getMoviesByDate = (date) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT * FROM movies WHERE dateRealesed LIKE ? AND realesed = false",
+      `%-${date}-%`,
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
+      }
+    );
+  });
+};
+
 exports.createMovies = (data) => {
   return new Promise((resolve, reject) => {
     connection.query("INSERT INTO movies SET ?", data, (err, result) => {

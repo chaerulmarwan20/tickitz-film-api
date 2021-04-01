@@ -151,6 +151,33 @@ exports.findOne = (req, res) => {
     });
 };
 
+exports.findMoviesByDate = (req, res) => {
+  const date = req.query.date;
+  const url = req.originalUrl;
+
+  moviesModel
+    .getMoviesByDate(date)
+    .then((result) => {
+      if (result < 1) {
+        helper.printError(res, 400, "Movies not found");
+        return;
+      }
+      client.setex(
+        "getMoviesByDate",
+        60 * 60 * 12,
+        JSON.stringify({
+          result,
+          url,
+          message: "Find movies by date from successfully",
+        })
+      );
+      helper.printSuccess(res, 200, "Find movies by date successfully", result);
+    })
+    .catch((err) => {
+      helper.printError(res, 500, err.message);
+    });
+};
+
 exports.create = (req, res) => {
   const {
     title,

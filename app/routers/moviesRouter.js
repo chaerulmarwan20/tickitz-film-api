@@ -33,6 +33,11 @@ router
     redis.oneData("getMoviesById"),
     moviesController.findOne
   )
+  .get(
+    "/find-movies/by-date",
+    redis.oneData("getMoviesByDate"),
+    moviesController.findMoviesByDate
+  )
   .post(
     "/",
     auth.verification(),
