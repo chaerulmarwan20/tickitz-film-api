@@ -75,14 +75,8 @@ exports.findAll = (req, res) => {
 };
 
 exports.findOne = (req, res) => {
-  const id = req.params.id;
+  const id = req.auth.id;
   const url = req.originalUrl;
-
-  const checkId = /^[0-9]+$/;
-  if (id.match(checkId) == null) {
-    helper.printError(res, 400, "Provide a valid id!");
-    return;
-  }
 
   usersModel
     .getUsersById(id)

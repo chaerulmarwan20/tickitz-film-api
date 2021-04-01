@@ -159,8 +159,8 @@ exports.create = (req, res) => {
     director,
     cast,
     synopsis,
-    rating,
     realesed,
+    dateRealesed,
   } = req.body;
   let image;
   if (!req.file) {
@@ -178,7 +178,7 @@ exports.create = (req, res) => {
     !director ||
     !cast ||
     !synopsis ||
-    !rating
+    !dateRealesed
   ) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
@@ -192,8 +192,8 @@ exports.create = (req, res) => {
     director,
     cast,
     synopsis,
-    rating,
     realesed: realesed === "true" ? true : false,
+    dateRealesed,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -223,8 +223,8 @@ exports.update = (req, res) => {
     director,
     cast,
     synopsis,
-    rating,
     realesed,
+    dateRealesed,
   } = req.body;
 
   if (
@@ -234,7 +234,7 @@ exports.update = (req, res) => {
     !director ||
     !cast ||
     !synopsis ||
-    !rating
+    !dateRealesed
   ) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
@@ -250,8 +250,8 @@ exports.update = (req, res) => {
     director,
     cast,
     synopsis,
-    rating,
     realesed: realesed === "true" ? true : false,
+    dateRealesed,
   };
 
   moviesModel

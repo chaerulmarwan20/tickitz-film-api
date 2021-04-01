@@ -13,7 +13,7 @@ router
     redis.allData("getAllUsers"),
     usersController.findAll
   )
-  .get("/:id", auth.verification(), usersController.findOne)
+  .get("/find-one", auth.verification(), usersController.findOne)
   .post("/", multer.uploadImage.single("image"), usersController.create)
   .get("/auth/verify", usersController.verify)
   .put("/moviegoers", auth.verification(), usersController.moviegoers)
