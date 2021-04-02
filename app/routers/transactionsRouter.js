@@ -25,7 +25,7 @@ router
     redis.allData("getAllTransactionsUsers"),
     transactionsController.findUsersTransactions
   )
-  .post("/", auth.verification(), auth.isAdmin(), transactionsController.create)
+  .post("/", auth.verification(), transactionsController.create)
   .put(
     "/:id",
     auth.verification(),

@@ -11,6 +11,7 @@ router
     redis.allData("getAllTickets"),
     ticketsController.findAll
   )
+  .get("/order", auth.verification(), ticketsController.findAllTicketsOrder)
   .get(
     "/:id",
     auth.verification(),

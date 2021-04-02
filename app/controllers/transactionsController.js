@@ -103,9 +103,25 @@ exports.findOne = (req, res) => {
 };
 
 exports.create = async (req, res) => {
-  const { idPaymentMethod, idUser, idTicket, idCinema, qty, total } = req.body;
+  const {
+    day,
+    idPaymentMethod,
+    idUser,
+    idTicket,
+    idCinema,
+    qty,
+    total,
+  } = req.body;
 
-  if (!idPaymentMethod || !idUser || !idTicket || !idCinema || !qty || !total) {
+  if (
+    !day ||
+    !idPaymentMethod ||
+    !idUser ||
+    !idTicket ||
+    !idCinema ||
+    !qty ||
+    !total
+  ) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   }
@@ -128,7 +144,9 @@ exports.create = async (req, res) => {
   }
 
   const data = {
+    day,
     date: new Date(),
+    time: new Date(),
     idPaymentMethod,
     idUser,
     idTicket,
@@ -164,6 +182,7 @@ exports.update = async (req, res) => {
   const checkId = /^[0-9]+$/;
 
   const {
+    day,
     idPaymentMethod,
     idUser,
     idTicket,
@@ -174,6 +193,7 @@ exports.update = async (req, res) => {
   } = req.body;
 
   if (
+    !day ||
     !idPaymentMethod ||
     !idUser ||
     !idTicket ||
@@ -207,6 +227,7 @@ exports.update = async (req, res) => {
   }
 
   const data = {
+    day,
     idPaymentMethod,
     idUser,
     idTicket,

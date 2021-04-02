@@ -60,6 +60,32 @@ exports.findAll = (req, res) => {
     });
 };
 
+exports.findAllTicketsOrder = (req, res) => {
+  const idSchedule = req.query.schedule;
+  const idTime = req.query.time;
+  if (!idSchedule || !idTime) {
+    helper.printError(res, 400, "Provide idSchedule, and idTime");
+    return;
+  }
+  ticketsModel
+    .getAllTicketsOrder(idSchedule, idTime)
+    .then((result) => {
+      if (result < 1) {
+        helper.printError(res, 400, "Tickets order not found");
+        return;
+      }
+      helper.printSuccess(
+        res,
+        200,
+        "Find all tickets order successfully",
+        result
+      );
+    })
+    .catch((err) => {
+      helper.printError(res, 500, err.message);
+    });
+};
+
 exports.findOne = (req, res) => {
   const id = req.params.id;
   const url = req.originalUrl;
@@ -94,9 +120,9 @@ exports.findOne = (req, res) => {
 };
 
 exports.create = async (req, res) => {
-  const { day, row, seat, price, qty, idMovie } = req.body;
+  const { category, price, available, idMovie, idSchedule, idSeat } = req.body;
 
-  if (!day || !row || !seat || !price || !qty || !idMovie) {
+  if (!category || !price || !available || !idMovie || !idSchedule || !idSeat) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   }
@@ -115,14 +141,12 @@ exports.create = async (req, res) => {
 
   const data = {
     movieTitle: titleMovie,
-    day,
-    row,
-    seat,
+    category,
     price,
-    qty,
+    available,
+    idSchedule,
+    idSeat,
     idMovie,
-    date: new Date(),
-    time: new Date(),
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -145,9 +169,9 @@ exports.update = async (req, res) => {
   const id = req.params.id;
   const checkId = /^[0-9]+$/;
 
-  const { day, row, seat, price, qty, idMovie } = req.body;
+  const { category, price, available, idMovie, idSchedule, idSeat } = req.body;
 
-  if (!day || !row || !seat || !price || !qty || !idMovie) {
+  if (!category || !price || !available || !idMovie || !idSchedule || !idSeat) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   } else if (id.match(checkId) == null) {
@@ -169,11 +193,11 @@ exports.update = async (req, res) => {
 
   const data = {
     movieTitle: titleMovie,
-    day,
-    row,
-    seat,
+    category,
     price,
-    qty,
+    available,
+    idSchedule,
+    idSeat,
     idMovie,
   };
 

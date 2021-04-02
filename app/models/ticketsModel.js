@@ -4,7 +4,7 @@ const helper = require("../helpers/linkPaginate");
 exports.getAllTickets = (queryPage, queryPerPage, keyword, sortBy, order) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT COUNT(*) AS totalData FROM movies INNER JOIN tickets ON movies.id = tickets.idMovie WHERE movies.title LIKE ? AND tickets.qty > 0",
+      "SELECT COUNT(*) AS totalData FROM movies INNER JOIN tickets ON movies.id = tickets.idMovie WHERE movies.title LIKE ? AND tickets.available = true",
       `%${keyword}%`,
       (err, result) => {
         let totalData, page, perPage, totalPage, previousPage, nextPage;
@@ -29,7 +29,7 @@ exports.getAllTickets = (queryPage, queryPerPage, keyword, sortBy, order) => {
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT tickets.id, movies.title AS movies, movies.genre, movies.cast, movies.synopsis, cinemas.name AS cinema, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.price, tickets.qty FROM ((tickets INNER JOIN movies ON tickets.idMovie = movies.id) INNER JOIN cinemas ON tickets.idCinema = cinemas.id) WHERE movies.title LIKE ? AND tickets.qty > 0 ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          `SELECT tickets.id, movies.title AS movies, seat.row, seat.seat, schedule.day, schedule.date, schedule.time, tickets.price, tickets.available FROM ((tickets INNER JOIN movies ON tickets.idMovie = movies.id) INNER JOIN schedule ON tickets.idSchedule = schedule.id INNER JOIN seat ON tickets.idSeat = seat.id) WHERE movies.title LIKE ? AND tickets.available = true ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
           [`%${keyword}%`, firstData, perPage],
           (err, result) => {
             if (err) {
@@ -55,8 +55,24 @@ exports.getAllTickets = (queryPage, queryPerPage, keyword, sortBy, order) => {
 exports.getTicketsById = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT tickets.id, movies.title AS movies, cinemas.name AS cinema, tickets.day, tickets.date, tickets.time, tickets.row, tickets.seat, tickets.qty, tickets.createdAt, tickets.updatedAt FROM ((tickets INNER JOIN movies ON tickets.idMovie = movies.id) INNER JOIN cinemas ON tickets.idCinema = cinemas.id) WHERE tickets.id = ?",
+      "SELECT tickets.id, movies.title AS movies, seat.row, seat.seat, schedule.day, schedule.date, schedule.time, tickets.price, tickets.available FROM ((tickets INNER JOIN movies ON tickets.idMovie = movies.id) INNER JOIN schedule ON tickets.idSchedule = schedule.id INNER JOIN seat ON tickets.idSeat = seat.id) WHERE tickets.id = ?",
       id,
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
+      }
+    );
+  });
+};
+
+exports.getAllTicketsOrder = (idSchedule, idTime) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT * FROM tickets WHERE idSchedule = ? AND idTime = ?",
+      [idSchedule, idTime],
       (err, result) => {
         if (!err) {
           resolve(result);
