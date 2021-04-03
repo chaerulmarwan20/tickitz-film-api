@@ -61,25 +61,23 @@ exports.findAll = (req, res) => {
 };
 
 exports.findAllTicketsOrder = (req, res) => {
-  const idSchedule = req.query.schedule;
-  const idTime = req.query.time;
-  if (!idSchedule || !idTime) {
-    helper.printError(res, 400, "Provide idSchedule, and idTime");
+  const schedule = req.query.schedule;
+  const time = req.query.time;
+  const movie = req.query.movie;
+
+  if (!schedule || !time || !movie) {
+    helper.printError(res, 400, "Content cannot be empty");
     return;
   }
+
   ticketsModel
-    .getAllTicketsOrder(idSchedule, idTime)
+    .getAllTicketsOrder(schedule, time, movie)
     .then((result) => {
       if (result < 1) {
-        helper.printError(res, 400, "Tickets order not found");
+        helper.printError(res, 400, "Tickets not found");
         return;
       }
-      helper.printSuccess(
-        res,
-        200,
-        "Find all tickets order successfully",
-        result
-      );
+      helper.printSuccess(res, 200, "Find all ticket successfully", result);
     })
     .catch((err) => {
       helper.printError(res, 500, err.message);

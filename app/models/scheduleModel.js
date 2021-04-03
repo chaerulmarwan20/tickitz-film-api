@@ -13,7 +13,7 @@ exports.getAllSchedule = (
 ) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT COUNT(*) AS totalData FROM schedule WHERE idMovie = ? AND idCity = ? AND date = ?",
+      "SELECT COUNT(*) AS totalData FROM schedule WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ?",
       [idMovie, idCity, date],
       (err, result) => {
         let totalData, page, perPage, totalPage, previousPage, nextPage;
@@ -38,7 +38,7 @@ exports.getAllSchedule = (
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT schedule.id, schedule.day, schedule.date, schedule.time, cinemas.image, cinemas.address, cinemas.name, tickets.price FROM ((schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id) INNER JOIN tickets ON schedule.idTicket = tickets.id) WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          `SELECT schedule.id, schedule.day, schedule.date, cinemas.image, cinemas.address, cinemas.name, tickets.price FROM ((schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id) INNER JOIN tickets ON schedule.idTicket = tickets.id) WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
           [idMovie, idCity, date, firstData, perPage],
           (err, result) => {
             if (err) {
@@ -61,11 +61,22 @@ exports.getAllSchedule = (
   });
 };
 
-exports.getAllTime = (id) => {
+exports.getAllTime = () => {
+  return new Promise((resolve, reject) => {
+    connection.query("SELECT * FROM time", (err, result) => {
+      if (!err) {
+        resolve(result);
+      } else {
+        reject(new Error("Internal server error"));
+      }
+    });
+  });
+};
+
+exports.getAllTicket = () => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT time.time FROM schedule LEFT OUTER JOIN schedule_time ON schedule.id = schedule_time.idSchedule LEFT OUTER JOIN time ON schedule_time.idTime = time.id WHERE schedule.id = ?",
-      id,
+      "SELECT idTime, idSchedule FROM tickets where available = true",
       (err, result) => {
         if (!err) {
           resolve(result);
@@ -80,7 +91,7 @@ exports.getAllTime = (id) => {
 exports.getScheduleById = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT schedule.id, schedule.day, schedule.date, schedule.time, cinemas.image, cinemas.address, cinemas.name, tickets.price FROM ((schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id) INNER JOIN tickets ON schedule.idTicket = tickets.id) WHERE schedule.id = ?",
+      "SELECT schedule.id, schedule.day, schedule.date, movies.title AS movie, cinemas.image, cinemas.address, cinemas.name, tickets.price FROM ((schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id) INNER JOIN tickets ON schedule.idTicket = tickets.id INNER JOIN movies ON schedule.idMovie = movies.id) WHERE schedule.id = ?",
       id,
       (err, result) => {
         if (!err) {

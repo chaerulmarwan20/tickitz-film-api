@@ -29,7 +29,7 @@ exports.getAllTickets = (queryPage, queryPerPage, keyword, sortBy, order) => {
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT tickets.id, movies.title AS movies, seat.row, seat.seat, schedule.day, schedule.date, schedule.time, tickets.price, tickets.available FROM ((tickets INNER JOIN movies ON tickets.idMovie = movies.id) INNER JOIN schedule ON tickets.idSchedule = schedule.id INNER JOIN seat ON tickets.idSeat = seat.id) WHERE movies.title LIKE ? AND tickets.available = true ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          `SELECT tickets.id, movies.title AS movies, seat.row, seat.seat, schedule.day, schedule.date, tickets.price, tickets.available FROM ((tickets INNER JOIN movies ON tickets.idMovie = movies.id) INNER JOIN schedule ON tickets.idSchedule = schedule.id INNER JOIN seat ON tickets.idSeat = seat.id) WHERE movies.title LIKE ? AND tickets.available = true ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
           [`%${keyword}%`, firstData, perPage],
           (err, result) => {
             if (err) {
@@ -68,11 +68,11 @@ exports.getTicketsById = (id) => {
   });
 };
 
-exports.getAllTicketsOrder = (idSchedule, idTime) => {
+exports.getAllTicketsOrder = (idSchedule, idTime, idMovie) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT * FROM tickets WHERE idSchedule = ? AND idTime = ?",
-      [idSchedule, idTime],
+      `SELECT tickets.id, tickets.movieTitle, tickets.category, tickets.price, tickets.available, seat.row, seat.seat FROM tickets INNER JOIN seat ON tickets.idSeat = seat.id WHERE idSchedule = ? AND idTime = ? AND idMovie = ?`,
+      [idSchedule, idTime, idMovie],
       (err, result) => {
         if (!err) {
           resolve(result);

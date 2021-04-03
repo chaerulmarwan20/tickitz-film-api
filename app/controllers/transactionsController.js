@@ -105,7 +105,7 @@ exports.findOne = (req, res) => {
 exports.create = async (req, res) => {
   const {
     day,
-    idPaymentMethod,
+    paymentMethod,
     idUser,
     idTicket,
     idCinema,
@@ -115,7 +115,7 @@ exports.create = async (req, res) => {
 
   if (
     !day ||
-    !idPaymentMethod ||
+    !paymentMethod ||
     !idUser ||
     !idTicket ||
     !idCinema ||
@@ -127,16 +127,11 @@ exports.create = async (req, res) => {
   }
 
   try {
-    const getPayment = await transactionsModel.getPayment(idPaymentMethod);
     const getUser = await transactionsModel.getUser(idUser);
     const getTicket = await transactionsModel.getTicket(idTicket);
     const getCinema = await transactionsModel.getCinema(idCinema);
     if (getTicket < 1 || getUser < 1 || getPayment < 1 || getCinema < 1) {
-      helper.printError(
-        res,
-        400,
-        "Id payment method or user or ticket or cinema not found!"
-      );
+      helper.printError(res, 400, "Id user or ticket or cinema not found!");
       return;
     }
   } catch (err) {
@@ -147,7 +142,7 @@ exports.create = async (req, res) => {
     day,
     date: new Date(),
     time: new Date(),
-    idPaymentMethod,
+    paymentMethod,
     idUser,
     idTicket,
     idCinema,
@@ -183,7 +178,7 @@ exports.update = async (req, res) => {
 
   const {
     day,
-    idPaymentMethod,
+    paymentMethod,
     idUser,
     idTicket,
     idCinema,
@@ -194,7 +189,7 @@ exports.update = async (req, res) => {
 
   if (
     !day ||
-    !idPaymentMethod ||
+    !paymentMethod ||
     !idUser ||
     !idTicket ||
     !idCinema ||
@@ -210,16 +205,11 @@ exports.update = async (req, res) => {
   }
 
   try {
-    const getPayment = await transactionsModel.getPayment(idPaymentMethod);
     const getUser = await transactionsModel.getUser(idUser);
     const getTicket = await transactionsModel.getTicket(idTicket);
     const getCinema = await transactionsModel.getCinema(idCinema);
     if (getTicket < 1 || getUser < 1 || getPayment < 1 || getCinema < 1) {
-      helper.printError(
-        res,
-        400,
-        "Id payment method or user or ticket or cinema not found!"
-      );
+      helper.printError(res, 400, "Id user or ticket or cinema not found!");
       return;
     }
   } catch (err) {
@@ -228,7 +218,7 @@ exports.update = async (req, res) => {
 
   const data = {
     day,
-    idPaymentMethod,
+    paymentMethod,
     idUser,
     idTicket,
     idCinema,

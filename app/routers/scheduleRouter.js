@@ -12,6 +12,7 @@ router
     scheduleController.findAll
   )
   .get("/time", auth.verification(), scheduleController.findAllTime)
+  .get("/ticket", auth.verification(), scheduleController.findAllTicket)
   .get(
     "/:id",
     auth.verification(),

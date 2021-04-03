@@ -10,7 +10,7 @@ exports.getAllTransactions = (
 ) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT COUNT(*) AS totalData FROM transactions INNER JOIN payments ON transactions.idPaymentMethod = payments.id INNER JOIN cinemas ON transactions.idCinema = cinemas.id WHERE payments.name LIKE ? OR cinemas.name LIKE ? OR transactions.status LIKE ?",
+      "SELECT COUNT(*) AS totalData FROM transactions INNER JOIN cinemas ON transactions.idCinema = cinemas.id WHERE transactions.paymentMethod LIKE ? OR cinemas.name LIKE ? OR transactions.status LIKE ?",
       [`%${keyword}%`, `%${keyword}%`, `%${keyword}%`],
       (err, result) => {
         let totalData, page, perPage, totalPage, previousPage, nextPage;
@@ -35,7 +35,7 @@ exports.getAllTransactions = (
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT transactions.id, transactions.date AS dateTransactions, users.fullName, tickets.movieTitle, tickets.date, tickets.day, tickets.time, tickets.row, tickets.seat, cinemas.name AS cinema, cinemas.image AS imageCinema, payments.name AS paymentMethod, tickets.price, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id INNER JOIN payments ON transactions.idPaymentMethod = payments.id INNER JOIN cinemas ON transactions.idCinema = cinemas.id) WHERE payments.name LIKE ? OR cinemas.name LIKE ? OR transactions.status LIKE ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          `SELECT transactions.id, transactions.date AS dateTransactions, transactions.paymentMethod, users.fullName, tickets.movieTitle, cinemas.name AS cinema, cinemas.image AS imageCinema, tickets.price, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id INNER JOIN cinemas ON transactions.idCinema = cinemas.id) WHERE transactions.paymentMethod LIKE ? OR cinemas.name LIKE ? OR transactions.status LIKE ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
           [`%${keyword}%`, `%${keyword}%`, `%${keyword}%`, firstData, perPage],
           (err, result) => {
             if (err) {
@@ -61,7 +61,7 @@ exports.getAllTransactions = (
 exports.getTransactionsById = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      `SELECT transactions.id, transactions.date AS dateTransactions, users.fullName, tickets.movieTitle, tickets.date, tickets.day, tickets.time, tickets.row, tickets.seat, cinemas.name AS cinema, cinemas.image AS imageCinema, payments.name AS paymentMethod, tickets.price, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id INNER JOIN payments ON transactions.idPaymentMethod = payments.id INNER JOIN cinemas ON transactions.idCinema = cinemas.id) WHERE transactions.id = ?`,
+      `SELECT transactions.id, transactions.date AS dateTransactions, transactions.paymentMethod, users.fullName, tickets.movieTitle, cinemas.name AS cinema, cinemas.image AS imageCinema, tickets.price, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id INNER JOIN cinemas ON transactions.idCinema = cinemas.id) WHERE transactions.id = ?`,
       id,
       (err, result) => {
         if (!err) {
@@ -186,22 +186,6 @@ exports.getCinema = (idCinema) => {
   });
 };
 
-exports.getPayment = (idPaymentMethod) => {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      "SELECT payments.id FROM payments WHERE id = ?",
-      idPaymentMethod,
-      (err, result) => {
-        if (!err) {
-          resolve(result);
-        } else {
-          reject(new Error("Internal server error"));
-        }
-      }
-    );
-  });
-};
-
 exports.getTransactionsUsers = (id, queryPage, queryPerPage, sortBy, order) => {
   return new Promise((resolve, reject) => {
     connection.query(
@@ -230,7 +214,7 @@ exports.getTransactionsUsers = (id, queryPage, queryPerPage, sortBy, order) => {
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT transactions.id, transactions.date AS dateTransactions, users.fullName, tickets.movieTitle, tickets.date, tickets.day, tickets.time, tickets.row, tickets.seat, cinemas.name AS cinema, cinemas.image AS imageCinema, payments.name AS paymentMethod, tickets.price, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id INNER JOIN payments ON transactions.idPaymentMethod = payments.id INNER JOIN cinemas ON transactions.idCinema = cinemas.id) WHERE transactions.idUser = ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          `SELECT transactions.id, transactions.date AS dateTransactions, transactions.paymentMethod, transactions.time, users.fullName, tickets.movieTitle, cinemas.name AS cinema, cinemas.image AS imageCinema, tickets.price, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id INNER JOIN cinemas ON transactions.idCinema = cinemas.id) WHERE transactions.idUser = ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
           [id, firstData, perPage],
           (err, result) => {
             if (err) {

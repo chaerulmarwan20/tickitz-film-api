@@ -77,19 +77,29 @@ exports.findAll = (req, res) => {
 };
 
 exports.findAllTime = (req, res) => {
-  const idSchedule = req.query.schedule;
-  if (!idSchedule) {
-    helper.printError(res, 400, "Provide idSchedule");
-    return;
-  }
   scheduleModel
-    .getAllTime(idSchedule)
+    .getAllTime()
     .then((result) => {
       if (result < 1) {
         helper.printError(res, 400, "Schedule not found");
         return;
       }
       helper.printSuccess(res, 200, "Find all time successfully", result);
+    })
+    .catch((err) => {
+      helper.printError(res, 500, err.message);
+    });
+};
+
+exports.findAllTicket = (req, res) => {
+  scheduleModel
+    .getAllTicket()
+    .then((result) => {
+      if (result < 1) {
+        helper.printError(res, 400, "Ticket not found");
+        return;
+      }
+      helper.printSuccess(res, 200, "Find all ticket successfully", result);
     })
     .catch((err) => {
       helper.printError(res, 500, err.message);
