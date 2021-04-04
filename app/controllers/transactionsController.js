@@ -104,23 +104,34 @@ exports.findOne = (req, res) => {
 
 exports.create = async (req, res) => {
   const {
-    day,
+    date,
+    time,
     paymentMethod,
     idUser,
-    idTicket,
     idCinema,
+    movieTitle,
+    category,
     qty,
+    seat,
     total,
+    idSeat,
   } = req.body;
 
+  const ticket = idSeat;
+  const totalSeat = seat;
+
   if (
-    !day ||
+    !date ||
+    !time ||
     !paymentMethod ||
     !idUser ||
-    !idTicket ||
     !idCinema ||
+    !movieTitle ||
+    !category ||
     !qty ||
-    !total
+    !seat ||
+    !total ||
+    !idSeat
   ) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
@@ -128,9 +139,8 @@ exports.create = async (req, res) => {
 
   try {
     const getUser = await transactionsModel.getUser(idUser);
-    const getTicket = await transactionsModel.getTicket(idTicket);
     const getCinema = await transactionsModel.getCinema(idCinema);
-    if (getTicket < 1 || getUser < 1 || getPayment < 1 || getCinema < 1) {
+    if (getUser < 1 || getCinema < 1) {
       helper.printError(res, 400, "Id user or ticket or cinema not found!");
       return;
     }
@@ -139,14 +149,15 @@ exports.create = async (req, res) => {
   }
 
   const data = {
-    day,
-    date: new Date(),
-    time: new Date(),
+    date,
+    time,
     paymentMethod,
     idUser,
-    idTicket,
     idCinema,
+    movieTitle,
+    category,
     qty,
+    seat: totalSeat.join(", "),
     total,
     status: "PENDING",
     createdAt: new Date(),
@@ -155,15 +166,26 @@ exports.create = async (req, res) => {
 
   transactionsModel
     .createTransactions(data)
-    .then((result) => {
+    .then(async (result) => {
       if (result.affectedRows === 0) {
         helper.printError(res, 400, "Error creating transactions");
         return;
       }
+      const idTransactions = result[0].id;
+      ticket.forEach((element) => {
+        transactionsModel.updateTickets(element);
+      });
+      ticket.forEach((element) => {
+        const detail = {
+          idTransactions: idTransactions,
+          idTicket: element,
+        };
+        transactionsModel.createDetailTransactions(detail);
+      });
       helper.printSuccess(
         res,
         200,
-        "New transactions has been created",
+        "Transactions tickets successfully",
         result
       );
     })
@@ -177,23 +199,25 @@ exports.update = async (req, res) => {
   const checkId = /^[0-9]+$/;
 
   const {
-    day,
     paymentMethod,
     idUser,
-    idTicket,
     idCinema,
+    movieTitle,
+    category,
     qty,
+    seat,
     total,
     status,
   } = req.body;
 
   if (
-    !day ||
     !paymentMethod ||
     !idUser ||
-    !idTicket ||
     !idCinema ||
+    !movieTitle ||
+    !category ||
     !qty ||
+    !seat ||
     !total ||
     !status
   ) {
@@ -206,9 +230,8 @@ exports.update = async (req, res) => {
 
   try {
     const getUser = await transactionsModel.getUser(idUser);
-    const getTicket = await transactionsModel.getTicket(idTicket);
     const getCinema = await transactionsModel.getCinema(idCinema);
-    if (getTicket < 1 || getUser < 1 || getPayment < 1 || getCinema < 1) {
+    if (getUser < 1 || getCinema < 1) {
       helper.printError(res, 400, "Id user or ticket or cinema not found!");
       return;
     }
@@ -217,12 +240,13 @@ exports.update = async (req, res) => {
   }
 
   const data = {
-    day,
     paymentMethod,
     idUser,
-    idTicket,
     idCinema,
+    movieTitle,
+    category,
     qty,
+    seat,
     total,
     status,
   };

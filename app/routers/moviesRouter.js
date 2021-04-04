@@ -27,12 +27,7 @@ router
     redis.allData("isMoviesNotRealesed"),
     moviesController.isNotRealesed
   )
-  .get(
-    "/:id",
-    auth.verification(),
-    redis.oneData("getMoviesById"),
-    moviesController.findOne
-  )
+  .get("/:id", auth.verification(), moviesController.findOne)
   .get(
     "/find-movies/by-date",
     redis.oneData("getMoviesByDate"),

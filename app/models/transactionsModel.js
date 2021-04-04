@@ -35,7 +35,7 @@ exports.getAllTransactions = (
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT transactions.id, transactions.date AS dateTransactions, transactions.paymentMethod, users.fullName, tickets.movieTitle, cinemas.name AS cinema, cinemas.image AS imageCinema, tickets.price, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id INNER JOIN cinemas ON transactions.idCinema = cinemas.id) WHERE transactions.paymentMethod LIKE ? OR cinemas.name LIKE ? OR transactions.status LIKE ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          `SELECT transactions.id, transactions.date AS dateTransactions, transactions.paymentMethod, users.fullName, transactions.movieTitle, transactions.category, cinemas.name AS cinema, cinemas.image AS imageCinema, transactions.qty, transactions.seat, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN cinemas ON transactions.idCinema = cinemas.id) WHERE transactions.paymentMethod LIKE ? OR cinemas.name LIKE ? OR transactions.status LIKE ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
           [`%${keyword}%`, `%${keyword}%`, `%${keyword}%`, firstData, perPage],
           (err, result) => {
             if (err) {
@@ -61,7 +61,7 @@ exports.getAllTransactions = (
 exports.getTransactionsById = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      `SELECT transactions.id, transactions.date AS dateTransactions, transactions.paymentMethod, users.fullName, tickets.movieTitle, cinemas.name AS cinema, cinemas.image AS imageCinema, tickets.price, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id INNER JOIN cinemas ON transactions.idCinema = cinemas.id) WHERE transactions.id = ?`,
+      `SELECT transactions.id, transactions.date AS dateTransactions, transactions.time, transactions.paymentMethod, users.fullName, transactions.movieTitle, transactions.category, cinemas.name AS cinema, cinemas.image AS imageCinema, transactions.qty, transactions.seat, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN cinemas ON transactions.idCinema = cinemas.id) WHERE transactions.id = ?`,
       id,
       (err, result) => {
         if (!err) {
@@ -154,22 +154,6 @@ exports.getUser = (idUser) => {
   });
 };
 
-exports.getTicket = (idTicket) => {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      "SELECT tickets.id FROM tickets WHERE id = ?",
-      idTicket,
-      (err, result) => {
-        if (!err) {
-          resolve(result);
-        } else {
-          reject(new Error("Internal server error"));
-        }
-      }
-    );
-  });
-};
-
 exports.getCinema = (idCinema) => {
   return new Promise((resolve, reject) => {
     connection.query(
@@ -198,7 +182,7 @@ exports.getTransactionsUsers = (id, queryPage, queryPerPage, sortBy, order) => {
         } else {
           totalData = result[0].totalData;
           page = queryPage ? parseInt(queryPage) : 1;
-          perPage = queryPerPage ? parseInt(queryPerPage) : 5;
+          perPage = queryPerPage ? parseInt(queryPerPage) : 10;
           totalPage = Math.ceil(totalData / perPage);
           const [previous, next] = helper.link(
             page,
@@ -214,7 +198,7 @@ exports.getTransactionsUsers = (id, queryPage, queryPerPage, sortBy, order) => {
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT transactions.id, transactions.date AS dateTransactions, transactions.paymentMethod, transactions.time, users.fullName, tickets.movieTitle, cinemas.name AS cinema, cinemas.image AS imageCinema, tickets.price, transactions.qty, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN tickets ON transactions.idTicket = tickets.id INNER JOIN cinemas ON transactions.idCinema = cinemas.id) WHERE transactions.idUser = ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          `SELECT transactions.id, transactions.date AS dateTransactions, transactions.paymentMethod, transactions.time, users.fullName, transactions.movieTitle, transactions.category, cinemas.name AS cinema, cinemas.image AS imageCinema, transactions.qty, transactions.seat, transactions.total, transactions.status FROM ((transactions INNER JOIN users ON transactions.idUser = users.id) INNER JOIN cinemas ON transactions.idCinema = cinemas.id) WHERE transactions.idUser = ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
           [id, firstData, perPage],
           (err, result) => {
             if (err) {
@@ -232,6 +216,48 @@ exports.getTransactionsUsers = (id, queryPage, queryPerPage, sortBy, order) => {
             }
           }
         );
+      }
+    );
+  });
+};
+
+exports.updateTickets = (id) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "UPDATE tickets SET available = false WHERE id = ?",
+      id,
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
+      }
+    );
+  });
+};
+
+exports.createDetailTransactions = (data) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "INSERT INTO detail_transactions SET ?",
+      data,
+      (err, result) => {
+        if (!err) {
+          connection.query(
+            "SELECT * FROM detail_transactions WHERE id = ?",
+            result.insertId,
+            (err, result) => {
+              if (!err) {
+                resolve(result);
+              } else {
+                reject(new Error("Internal server error"));
+              }
+            }
+          );
+        } else {
+          reject(new Error("Internal server error"));
+        }
       }
     );
   });

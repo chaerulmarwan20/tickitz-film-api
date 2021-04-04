@@ -13,12 +13,7 @@ router
   )
   .get("/time", auth.verification(), scheduleController.findAllTime)
   .get("/ticket", auth.verification(), scheduleController.findAllTicket)
-  .get(
-    "/:id",
-    auth.verification(),
-    redis.oneData("getScheduleById"),
-    scheduleController.findOne
-  );
+  .get("/:id", auth.verification(), scheduleController.findOne);
 // .post("/", auth.verification(), auth.isAdmin(), scheduleController.create)
 // .put("/:id", auth.verification(), auth.isAdmin(), scheduleController.update)
 // .delete(

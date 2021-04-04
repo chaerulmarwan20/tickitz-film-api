@@ -12,17 +12,10 @@ router
     redis.allData("getAllTransactions"),
     transactionsController.findAll
   )
-  .get(
-    "/:id",
-    auth.verification(),
-    auth.isAdmin(),
-    redis.oneData("getTransactionsById"),
-    transactionsController.findOne
-  )
+  .get("/:id", auth.verification(), transactionsController.findOne)
   .get(
     "/users/:id",
     auth.verification(),
-    redis.allData("getAllTransactionsUsers"),
     transactionsController.findUsersTransactions
   )
   .post("/", auth.verification(), transactionsController.create)

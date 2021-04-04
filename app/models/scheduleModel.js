@@ -91,7 +91,7 @@ exports.getAllTicket = () => {
 exports.getScheduleById = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT schedule.id, schedule.day, schedule.date, movies.title AS movie, cinemas.image, cinemas.address, cinemas.name, tickets.price FROM ((schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id) INNER JOIN tickets ON schedule.idTicket = tickets.id INNER JOIN movies ON schedule.idMovie = movies.id) WHERE schedule.id = ?",
+      "SELECT schedule.id, schedule.day, schedule.date, schedule.idMovie, schedule.idCinema, schedule.idTicket, movies.title AS movie, cinemas.image, cinemas.address, cinemas.name, tickets.price FROM ((schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id) INNER JOIN tickets ON schedule.idTicket = tickets.id INNER JOIN movies ON schedule.idMovie = movies.id) WHERE schedule.id = ?",
       id,
       (err, result) => {
         if (!err) {
