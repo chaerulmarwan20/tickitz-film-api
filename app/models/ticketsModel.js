@@ -71,7 +71,7 @@ exports.getTicketsById = (id) => {
 exports.getAllTicketsOrder = (idSchedule, idTime, idMovie) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      `SELECT tickets.id, tickets.movieTitle, tickets.category, tickets.price, tickets.available, seat.row, seat.seat FROM tickets INNER JOIN seat ON tickets.idSeat = seat.id WHERE idSchedule = ? AND idTime = ? AND idMovie = ?`,
+      `SELECT tickets.id, tickets.movieTitle, tickets.category, tickets.price, tickets.available, seat.row, seat.seat FROM tickets INNER JOIN seat ON tickets.idSeat = seat.id WHERE idSchedule = ? AND time = ? AND idMovie = ?`,
       [idSchedule, idTime, idMovie],
       (err, result) => {
         if (!err) {

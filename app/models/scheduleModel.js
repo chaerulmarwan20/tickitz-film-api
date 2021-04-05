@@ -38,7 +38,7 @@ exports.getAllSchedule = (
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT schedule.id, schedule.day, schedule.date, cinemas.image, cinemas.address, cinemas.name, tickets.price FROM ((schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id) INNER JOIN tickets ON schedule.idTicket = tickets.id) WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          `SELECT schedule.id, schedule.day, schedule.date, schedule.time1, schedule.time2, schedule.time3, schedule.time4, schedule.time5, schedule.time6, schedule.time7, cinemas.image, cinemas.address, cinemas.name, tickets.price FROM ((schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id) INNER JOIN tickets ON schedule.idTicket = tickets.id) WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
           [idMovie, idCity, date, firstData, perPage],
           (err, result) => {
             if (err) {
@@ -76,7 +76,7 @@ exports.getAllTime = () => {
 exports.getAllTicket = () => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT idTime, idSchedule FROM tickets where available = true",
+      "SELECT idSchedule FROM tickets where available = true",
       (err, result) => {
         if (!err) {
           resolve(result);
@@ -101,6 +101,30 @@ exports.getScheduleById = (id) => {
         }
       }
     );
+  });
+};
+
+exports.createSeat = (data) => {
+  return new Promise((resolve, reject) => {
+    connection.query("INSERT INTO seat SET ?", data, (err, result) => {
+      if (!err) {
+        resolve(result);
+      } else {
+        reject(new Error("Internal server error"));
+      }
+    });
+  });
+};
+
+exports.createTicket = (data) => {
+  return new Promise((resolve, reject) => {
+    connection.query("INSERT INTO tickets SET ?", data, (err, result) => {
+      if (!err) {
+        resolve(result);
+      } else {
+        reject(new Error("Internal server error"));
+      }
+    });
   });
 };
 

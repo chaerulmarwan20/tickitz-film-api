@@ -139,6 +139,36 @@ exports.findOne = (req, res) => {
     });
 };
 
+exports.createSeat = (req, res) => {
+  const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+
+  arr.forEach((element) => {
+    const data = {
+      row: "G",
+      seat: element,
+    };
+    scheduleModel.createSeat(data);
+  });
+  helper.printSuccess(res, 200, "New seats has been created", {});
+};
+
+exports.createTicket = (req, res) => {
+  for (let i = 1; i <= 98; i++) {
+    const data = {
+      movieTitle: "The Old Guard",
+      category: "PG-13",
+      price: 10,
+      available: true,
+      idSchedule: 1,
+      time: "08:30am",
+      idSeat: i,
+      idMovie: 1,
+    };
+    scheduleModel.createTicket(data);
+  }
+  helper.printSuccess(res, 200, "New tickets has been created", {});
+};
+
 // exports.create = async (req, res) => {
 //   const { price, available, idMovie, idSchedule, idSeat } = req.body;
 
