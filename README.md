@@ -22,13 +22,22 @@ The tickitz film application is created using how many dependencies, along with 
 - **[Nodemailer](https://www.npmjs.com/package/nodemailer)**
 - **[Redis](https://redis.io/)**
 
+## Features
+- JWT authentication
+- Multilevel authorization (Admin and User)
+- Nodemailer for email verification
+- Upload image using multer
+- Redis server
+- CRUD for all tables required in the application
+
 ## How to Run
 
 1. Clone the repository `git clone https://github.com/chaerulmarwan20/tickitz-film-api.git`
-2. Go to directory `cd tickitz-film-api`
-3. Install all required dependencies `npm install`
-4. Create a new file named `.env`, add it's content from `.env.example`
-5. Run server `npm run dev'
+2. Create database named `tickitz-film` and import `tickitz-film.sql` from this repository
+3. Go to directory `cd tickitz-film-api`
+4. Install all required dependencies `npm install`
+5. Create a new file named `.env`, add it's content from `.env.example`
+6. Run server `npm run dev'
 
 ## Link:
 
