@@ -55,7 +55,9 @@ The Tickitz application is a web application created using node.js and its frame
 |  `POST`  |           /v1/users            |
 |  `GET`   |     /v1/users/auth/verify      |
 |  `PUT`   |         /v1/users/:id          |
+|  `PUT`   |      /v1/users/moviegoers      |
 |  `POST`  |      /v1/users/auth/login      |
+|  `POST`  |   /v1/users/auth/check-email   |
 |  `POST`  | /v1/users/auth/forgot-password |
 |  `PUT`   | /v1/users/auth/reset-password  |
 | `DELETE` |         /v1/users/:id          |
