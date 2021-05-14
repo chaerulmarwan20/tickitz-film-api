@@ -8,7 +8,6 @@
 - [Introduction](#introduction)
 - [Features](#features)
 - [Built With](#built-with)
-- [Package](#package)
 - [Prerequisites](#prerequisites)
 - [Endpoint](#endpoint)
 - [Installation](#installation)
@@ -38,24 +37,7 @@ The Tickitz application is a web application created using node.js and its frame
 - [MySQL](https://www.mysql.com/)
 - [Redis](https://redis.io/)
 - [JWT](https://jwt.io/)
-
-## Package
-
-The tickitz application is created using how many package, along with a list of package:
-
-- **[Express](https://www.npmjs.com/package/express)**
-- **[Nodemon](https://www.npmjs.com/package/nodemon)**
-- **[MySQL2](https://www.npmjs.com/package/mysql2)**
-- **[Cors](https://www.npmjs.com/package/cors)**
-- **[Standard](https://www.npmjs.com/package/standard)**
-- **[Dotenv](https://www.npmjs.com/package/dotenv)**
-- **[Morgan](https://www.npmjs.com/package/morgan)**
-- **[Bcrypt](https://www.npmjs.com/package/bcrypt)**
-- **[Ip](https://www.npmjs.com/package/ip)**
-- **[JWT](https://www.npmjs.com/package/jsonwebtoken)**
-- **[Multer](https://www.npmjs.com/package/multer)**
-- **[Nodemailer](https://www.npmjs.com/package/nodemailer)**
-- **[Redis](https://www.npmjs.com/package/redis)**
+- [Nodemailer](https://nodemailer.com/)
 
 ## Prerequisites
 
