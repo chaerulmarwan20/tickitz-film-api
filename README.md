@@ -1,4 +1,4 @@
-<h1 align="center">Backend - Tickitz Film</h1>
+<h1 align="center">Backend - Tickitz</h1>
 <p align="center">
   <a href="https://booking-tickitz-film.netlify.app/" target="_blank"><img src="https://i.ibb.co/tzSzq4x/Tickitz-2.png" alt="Tickitz-2" border="0" /></a>
 </p>
@@ -16,7 +16,7 @@
 
 ## Introduction
 
-The Tickitz Film application is a web application created using node.js and its framework called express.js. This application will make it easier for users to order or purchase tickets to watch movies in their favorite cinemas. This application will also allow users to find out the details of a film, such as the players, the director and even the synopsis. So, you can see in advance who the players are, who is the director who made the film, and what the synopsis looks like.
+The Tickitz application is a web application created using node.js and its framework called express.js. This application will make it easier for users to order or purchase tickets to watch movies in their favorite cinemas. This application will also allow users to find out the details of a film, such as the players, the director and even the synopsis. So, you can see in advance who the players are, who is the director who made the film, and what the synopsis looks like.
 
 ## Features
 
@@ -40,7 +40,7 @@ The Tickitz Film application is a web application created using node.js and its 
 
 ## Package
 
-The tickitz film application is created using how many package, along with a list of package:
+The tickitz application is created using how many package, along with a list of package:
 
 - **[Express](https://www.npmjs.com/package/express)**
 - **[Nodemon](https://www.npmjs.com/package/nodemon)**
