@@ -21,7 +21,7 @@ The Tickitz application is a web application created using node.js and its frame
 
 - JWT authentication
 
-- Multilevel authorization (Admin and User)
+- Multilevel authorization
 
 - Nodemailer for email verification
 
