@@ -41,8 +41,6 @@ The Tickitz application is a web application created using node.js and its frame
 
 ## Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-
 - [NodeJs](https://nodejs.org/en/download/)
 - [XAMPP](https://www.apachefriends.org/index.html)
 
