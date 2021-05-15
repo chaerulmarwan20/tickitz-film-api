@@ -104,24 +104,24 @@ exports.findOne = (req, res) => {
 exports.create = async (req, res) => {
   let image;
   if (!req.file) {
-    image = "images\\avatar.png";
+    image = "images\\default.png";
   } else {
     image = req.file.path;
   }
 
-  const { firstName, lastName, phoneNumber, email, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!firstName || !lastName || !phoneNumber || !email || !password) {
+  if (!email || !password) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   }
 
   const data = {
-    firstName,
-    lastName,
-    fullName: firstName + " " + lastName,
+    firstName: "firstName",
+    lastName: "lastName",
+    fullName: "firstName" + " " + "lastName",
     image,
-    phoneNumber,
+    phoneNumber: "000000000000",
     email,
     password: await hash.hashPassword(password),
     role: 2,
@@ -261,7 +261,7 @@ exports.update = async (req, res) => {
         image = result[0].image;
       } else {
         const oldImage = result[0].image;
-        if (oldImage !== "images\\avatar.png") {
+        if (oldImage !== "images\\default.png") {
           removeImage(oldImage);
         }
         image = req.file.path;
@@ -271,7 +271,7 @@ exports.update = async (req, res) => {
     })
     .then((result) => {
       delete result[0].password;
-      helper.printSuccess(res, 200, "Users has been updated", result);
+      helper.printSuccess(res, 200, "Your data has been updated", result);
     })
     .catch((err) => {
       if (err.message === "Internal server error") {
@@ -294,7 +294,7 @@ exports.delete = (req, res) => {
     .findUser(id, "delete")
     .then((result) => {
       const image = result[0].image;
-      if (image !== "images\\avatar.png") {
+      if (image !== "images\\default.png") {
         removeImage(image);
       }
       return usersModel.deleteUsers(id);
@@ -308,11 +308,6 @@ exports.delete = (req, res) => {
       }
       helper.printError(res, 400, err.message);
     });
-};
-
-const removeImage = (filePath) => {
-  filePath = path.join(__dirname, "../..", filePath);
-  fs.unlink(filePath, (err) => new Error(err));
 };
 
 exports.login = (req, res) => {
@@ -351,7 +346,7 @@ exports.login = (req, res) => {
           ipAddress: ip.address(),
         };
         await usersModel.createToken(data);
-        helper.printSuccess(res, 200, "Login successfull", result);
+        helper.printSuccess(res, 200, "Login successfully", result);
       });
     })
     .catch((err) => {
@@ -494,6 +489,7 @@ exports.resetPassword = async (req, res) => {
 
 exports.moviegoers = async (req, res) => {
   const email = req.body.email;
+  const id = req.auth.id;
 
   if (!email) {
     helper.printError(res, 400, "Content cannot be empty");
@@ -501,9 +497,20 @@ exports.moviegoers = async (req, res) => {
   }
 
   try {
+    const result = await usersModel.checkAccount(id, email);
+    if (result.length < 1) {
+      helper.printError(res, 400, "Email is not valid!");
+      return;
+    }
+  } catch (err) {
+    helper.printError(res, 500, err.message);
+    return;
+  }
+
+  try {
     const moviegoers = await usersModel.checkMoviegoers(email);
     if (moviegoers.length > 0) {
-      helper.printError(res, 200, "Your account has become moviegoers");
+      helper.printError(res, 400, "Your account has become moviegoers");
       return;
     }
   } catch (err) {
@@ -527,4 +534,9 @@ exports.moviegoers = async (req, res) => {
     .catch((err) => {
       helper.printError(res, 500, err.message);
     });
+};
+
+const removeImage = (filePath) => {
+  filePath = path.join(__dirname, "../..", filePath);
+  fs.unlink(filePath, (err) => new Error(err));
 };

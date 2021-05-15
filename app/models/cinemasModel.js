@@ -29,7 +29,7 @@ exports.getAllCinemas = (queryPage, queryPerPage, keyword, sortBy, order) => {
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT cinemas.id, cinemas.name, cinemas.address, cities.name AS city, cinemas.createdAt, cinemas.updatedAt FROM cinemas INNER JOIN cities ON cinemas.idCity = cities.id WHERE cinemas.name LIKE ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          `SELECT cinemas.id, cinemas.name, cinemas.address, cinemas.description, cinemas.image, cities.name AS city, cinemas.createdAt, cinemas.updatedAt FROM cinemas INNER JOIN cities ON cinemas.idCity = cities.id WHERE cinemas.name LIKE ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
           [`%${keyword}%`, firstData, perPage],
           (err, result) => {
             if (err) {

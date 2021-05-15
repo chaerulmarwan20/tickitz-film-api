@@ -6,12 +6,7 @@ const redis = require("../middlewares/redis");
 const auth = require("../middlewares/auth");
 
 router
-  .get(
-    "/",
-    auth.verification(),
-    redis.allData("getAllCinemas"),
-    cinemasController.findAll
-  )
+  .get("/", cinemasController.findAll)
   .get(
     "/:id",
     auth.verification(),
