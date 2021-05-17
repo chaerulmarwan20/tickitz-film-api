@@ -182,12 +182,7 @@ exports.create = async (req, res) => {
         };
         transactionsModel.createDetailTransactions(detail);
       });
-      helper.printSuccess(
-        res,
-        200,
-        "Transactions tickets successfully",
-        result
-      );
+      helper.printSuccess(res, 200, "Order ticket success", result);
     })
     .catch((err) => {
       helper.printError(res, 500, err.message);

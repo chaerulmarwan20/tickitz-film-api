@@ -13,7 +13,7 @@ exports.getAllSchedule = (
 ) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT COUNT(*) AS totalData FROM schedule WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ?",
+      "SELECT COUNT(*) AS totalData FROM schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ?",
       [idMovie, idCity, date],
       (err, result) => {
         let totalData, page, perPage, totalPage, previousPage, nextPage;
@@ -38,7 +38,7 @@ exports.getAllSchedule = (
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT schedule.id, schedule.day, schedule.date, schedule.time1, schedule.time2, schedule.time3, schedule.time4, schedule.time5, schedule.time6, schedule.time7, cinemas.image, cinemas.address, cinemas.name, tickets.price FROM ((schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id) INNER JOIN tickets ON schedule.idTicket = tickets.id) WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          `SELECT schedule.id, schedule.day, schedule.date, schedule.price, schedule.time, cinemas.image, cinemas.address, cinemas.name FROM schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
           [idMovie, idCity, date, firstData, perPage],
           (err, result) => {
             if (err) {
@@ -91,7 +91,7 @@ exports.getAllTicket = () => {
 exports.getScheduleById = (id) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT schedule.id, schedule.day, schedule.date, schedule.idMovie, schedule.idCinema, schedule.idTicket, movies.title AS movie, cinemas.image, cinemas.address, cinemas.name, tickets.price FROM ((schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id) INNER JOIN tickets ON schedule.idTicket = tickets.id INNER JOIN movies ON schedule.idMovie = movies.id) WHERE schedule.id = ?",
+      "SELECT schedule.id, schedule.day, schedule.date, schedule.price, schedule.idMovie, schedule.idCinema, movies.title AS movie, cinemas.image, cinemas.address, cinemas.name FROM ((schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id) INNER JOIN movies ON schedule.idMovie = movies.id) WHERE schedule.id = ?",
       id,
       (err, result) => {
         if (!err) {

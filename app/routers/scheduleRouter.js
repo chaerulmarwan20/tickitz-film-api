@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const scheduleController = require("../controllers/scheduleController");
-const redis = require("../middlewares/redis");
 const auth = require("../middlewares/auth");
 
 router
