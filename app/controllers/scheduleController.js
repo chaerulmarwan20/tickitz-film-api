@@ -1,7 +1,12 @@
+const path = require("path");
+const fs = require("fs");
+const moment = require("moment");
 const redis = require("redis");
 const port = process.env.REDIS_PORT;
 const client = redis.createClient(port);
 const scheduleModel = require("../models/scheduleModel");
+const moviesModel = require("../models/moviesModel");
+const validation = require("../helpers/validation");
 const helper = require("../helpers/printHelper");
 
 exports.findAll = (req, res) => {
@@ -169,119 +174,191 @@ exports.createTicket = (req, res) => {
   helper.printSuccess(res, 200, "New tickets has been created", {});
 };
 
-// exports.create = async (req, res) => {
-//   const { price, available, idMovie, idSchedule, idSeat } = req.body;
+exports.create = (req, res) => {
+  req.body.cinema = JSON.parse(req.body.cinema);
+  req.body.time = JSON.parse(req.body.time);
 
-//   if (!price || !available || !idMovie || !idSchedule || !idSeat) {
-//     helper.printError(res, 400, "Content cannot be empty");
-//     return;
-//   }
+  const formValidate = validation.validationSchedule(req.body);
 
-//   let titleMovie;
-//   try {
-//     const getTitle = await scheduleModel.getMovieTitle(idMovie);
-//     if (getTitle < 1) {
-//       helper.printError(res, 400, "Id movie or cinema not found!");
-//       return;
-//     }
-//     titleMovie = getTitle[0].title;
-//   } catch (err) {
-//     helper.printError(res, 500, err.message);
-//   }
+  if (formValidate.error) {
+    helper.printError(res, 400, formValidate.error.details[0].message);
+    return;
+  }
+  let image;
+  if (!req.file) {
+    helper.printError(res, 400, "Image is required");
+    return;
+  } else {
+    image = req.file.path;
+  }
 
-//   const data = {
-//     movieTitle: titleMovie,
-//     price,
-//     available,
-//     idSchedule,
-//     idSeat,
-//     idMovie,
-//     createdAt: new Date(),
-//     updatedAt: new Date(),
-//   };
+  const cinema = req.body.cinema;
+  const time = req.body.time;
 
-//   scheduleModel
-//     .createTickets(data)
-//     .then((result) => {
-//       if (result.affectedRows === 0) {
-//         helper.printError(res, 400, "Error creating movies");
-//         return;
-//       }
-//       helper.printSuccess(res, 200, "New movies has been created", result);
-//     })
-//     .catch((err) => {
-//       helper.printError(res, 500, err.message);
-//     });
-// };
+  const {
+    title,
+    genre,
+    duration,
+    director,
+    cast,
+    synopsis,
+    category,
+    // realesed,
+    dateRealesed,
+    dateSchedule,
+    city,
+  } = req.body;
 
-// exports.update = async (req, res) => {
-//   const id = req.params.id;
-//   const checkId = /^[0-9]+$/;
+  const data = {
+    title,
+    image,
+    genre,
+    duration,
+    director,
+    cast,
+    synopsis,
+    category,
+    // realesed: realesed === true || realesed === "true" ? true : false,
+    realesed: true,
+    dateRealesed,
+  };
 
-//   const { price, available, idMovie, idSchedule, idSeat } = req.body;
+  helper.printSuccess(res, 200, "New movies has been created", {});
 
-//   if (!price || !available || !idMovie || !idSchedule || !idSeat) {
-//     helper.printError(res, 400, "Content cannot be empty");
-//     return;
-//   } else if (id.match(checkId) == null) {
-//     helper.printError(res, 400, "Provide a valid id!");
-//     return;
-//   }
+  moviesModel
+    .createMovies(data)
+    .then(async (result) => {
+      const idMovie = result[0].id;
+      if (result.affectedRows === 0) {
+        helper.printError(res, 400, "Error creating movies");
+        return;
+      }
+      const dayNow = moment(dateSchedule).format("dddd");
+      for (let a = 0; a < cinema.length; a++) {
+        const dataSchedule = {
+          day: dayNow,
+          date: dateSchedule,
+          price: 30000,
+          time: JSON.stringify(time),
+          idCity: city,
+          idMovie,
+          idCinema: cinema[a],
+        };
+        let idSchedule;
+        const scheduleResult = await scheduleModel.createSchedule(dataSchedule);
+        idSchedule = scheduleResult[0].id;
+        if (scheduleResult.affectedRows === 0) {
+          helper.printError(res, 400, "Error creating movies");
+          return;
+        }
+        for (let i = 0; i < time.length; i++) {
+          for (let j = 1; j <= 98; j++) {
+            const dataTicket = {
+              movieTitle: title,
+              category,
+              available: true,
+              idSchedule,
+              time: time[i],
+              idSeat: j,
+              idMovie,
+            };
+            const ticketResult = await scheduleModel.createTicket(dataTicket);
+            if (ticketResult.affectedRows === 0) {
+              helper.printError(res, 400, "Error creating movies");
+              return;
+            }
+          }
+        }
+      }
+      helper.printSuccess(res, 200, "New movies has been created", result);
+    })
+    .catch((err) => {
+      helper.printError(res, 500, err.message);
+    });
+};
 
-//   let titleMovie;
-//   try {
-//     const getTitle = await scheduleModel.getMovieTitle(idMovie);
-//     if (getTitle < 1) {
-//       helper.printError(res, 400, "Id movie or cinema not found!");
-//       return;
-//     }
-//     titleMovie = getTitle[0].title;
-//   } catch (err) {
-//     helper.printError(res, 500, err.message);
-//   }
+exports.update = (req, res) => {
+  const id = req.params.id;
+  const checkId = /^[0-9]+$/;
 
-//   const data = {
-//     movieTitle: titleMovie,
-//     price,
-//     available,
-//     idSchedule,
-//     idSeat,
-//     idMovie,
-//   };
+  const formValidate = validation.validationMovie(req.body);
 
-//   scheduleModel
-//     .updateTickets(id, data)
-//     .then((result) => {
-//       if (result < 1) {
-//         helper.printError(res, 400, `Cannot update tickets with id = ${id}`);
-//         return;
-//       }
-//       helper.printSuccess(res, 200, "Tickets has been updated", result);
-//     })
-//     .catch((err) => {
-//       helper.printError(res, 500, err.message);
-//     });
-// };
+  if (formValidate.error) {
+    helper.printError(res, 400, formValidate.error.details[0].message);
+    return;
+  }
 
-// exports.delete = (req, res) => {
-//   const id = req.params.id;
+  const { title, genre, duration, director, cast, synopsis, category } =
+    req.body;
 
-//   const checkId = /^[0-9]+$/;
-//   if (id.match(checkId) == null) {
-//     helper.printError(res, 400, "Provide a valid id!");
-//     return;
-//   }
+  if (id.match(checkId) == null) {
+    helper.printError(res, 400, "Provide a valid id!");
+    return;
+  }
 
-//   scheduleModel
-//     .deleteTickets(id)
-//     .then((result) => {
-//       if (result.affectedRows === 0) {
-//         helper.printError(res, 400, `Cannot delete tickets with id = ${id}`);
-//         return;
-//       }
-//       helper.printSuccess(res, 200, "Tickets has been deleted", {});
-//     })
-//     .catch((err) => {
-//       helper.printError(res, 500, err.message);
-//     });
-// };
+  const data = {
+    title,
+    genre,
+    duration,
+    director,
+    cast,
+    synopsis,
+    category,
+  };
+
+  moviesModel
+    .findMovies(id, "update")
+    .then((result) => {
+      let image;
+      if (!req.file) {
+        image = result[0].image;
+      } else {
+        const oldImage = result[0].image;
+        removeImage(oldImage);
+        image = req.file.path;
+      }
+      data.image = image;
+      return moviesModel.updateMovies(id, data);
+    })
+    .then((result) => {
+      helper.printSuccess(res, 200, "Movies has been updated", result);
+    })
+    .catch((err) => {
+      if (err.message === "Internal server error") {
+        helper.printError(res, 500, err.message);
+      }
+      helper.printError(res, 400, err.message);
+    });
+};
+
+exports.delete = (req, res) => {
+  const id = req.params.id;
+
+  const checkId = /^[0-9]+$/;
+  if (id.match(checkId) == null) {
+    helper.printError(res, 400, "Provide a valid id!");
+    return;
+  }
+
+  moviesModel
+    .findMovies(id, "delete")
+    .then((result) => {
+      const image = result[0].image;
+      removeImage(image);
+      return moviesModel.deleteMovies(id);
+    })
+    .then((result) => {
+      helper.printSuccess(res, 200, "Movies has been deleted", {});
+    })
+    .catch((err) => {
+      if (err.message === "Internal server error") {
+        helper.printError(res, 500, err.message);
+      }
+      helper.printError(res, 400, err.message);
+    });
+};
+
+const removeImage = (filePath) => {
+  filePath = path.join(__dirname, "../..", filePath);
+  fs.unlink(filePath, (err) => new Error(err));
+};

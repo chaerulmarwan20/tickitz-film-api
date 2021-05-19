@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const scheduleController = require("../controllers/scheduleController");
+const multer = require("../middlewares/multer");
 const auth = require("../middlewares/auth");
 
 router
@@ -9,8 +10,27 @@ router
   .get("/ticket", auth.verification(), scheduleController.findAllTicket)
   .get("/:id", auth.verification(), scheduleController.findOne)
   .post("/seat", auth.verification(), scheduleController.createSeat)
-  .post("/ticket", auth.verification(), scheduleController.createTicket);
-// .post("/", auth.verification(), auth.isAdmin(), scheduleController.create)
+  .post("/ticket", auth.verification(), scheduleController.createTicket)
+  .post(
+    "/",
+    auth.verification(),
+    auth.isAdmin(),
+    multer.uploadImage.single("image"),
+    scheduleController.create
+  )
+  .put(
+    "/:id",
+    auth.verification(),
+    auth.isAdmin(),
+    multer.uploadImage.single("image"),
+    scheduleController.update
+  )
+  .delete(
+    "/:id",
+    auth.verification(),
+    auth.isAdmin(),
+    scheduleController.delete
+  );
 // .put("/:id", auth.verification(), auth.isAdmin(), scheduleController.update)
 // .delete(
 //   "/:id",

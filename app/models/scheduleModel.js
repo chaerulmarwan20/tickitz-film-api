@@ -13,7 +13,7 @@ exports.getAllSchedule = (
 ) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT COUNT(*) AS totalData FROM schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ?",
+      "SELECT COUNT(*) AS totalData FROM schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id INNER JOIN movies ON schedule.idMovie = movies.id WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ? AND movies.realesed = true",
       [idMovie, idCity, date],
       (err, result) => {
         let totalData, page, perPage, totalPage, previousPage, nextPage;
@@ -38,7 +38,7 @@ exports.getAllSchedule = (
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT schedule.id, schedule.day, schedule.date, schedule.price, schedule.time, cinemas.image, cinemas.address, cinemas.name FROM schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          `SELECT schedule.id, schedule.day, schedule.date, schedule.price, schedule.time, cinemas.image, cinemas.address, cinemas.name FROM schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id INNER JOIN movies ON schedule.idMovie = movies.id WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ? AND movies.realesed = true ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
           [idMovie, idCity, date, firstData, perPage],
           (err, result) => {
             if (err) {
@@ -128,78 +128,24 @@ exports.createTicket = (data) => {
   });
 };
 
-// exports.createTickets = (data) => {
-//   return new Promise((resolve, reject) => {
-//     connection.query("INSERT INTO tickets SET ?", data, (err, result) => {
-//       if (!err) {
-//         connection.query(
-//           "SELECT * FROM tickets WHERE id = ?",
-//           result.insertId,
-//           (err, result) => {
-//             if (!err) {
-//               resolve(result);
-//             } else {
-//               reject(new Error("Internal server error"));
-//             }
-//           }
-//         );
-//       } else {
-//         reject(new Error("Internal server error"));
-//       }
-//     });
-//   });
-// };
-
-// exports.updateTickets = (id, data) => {
-//   return new Promise((resolve, reject) => {
-//     connection.query(
-//       "UPDATE tickets SET ? WHERE id = ?",
-//       [data, id],
-//       (err, result) => {
-//         if (!err) {
-//           connection.query(
-//             "SELECT * FROM tickets WHERE id = ?",
-//             id,
-//             (err, result) => {
-//               if (!err) {
-//                 resolve(result);
-//               } else {
-//                 reject(new Error("Internal server error"));
-//               }
-//             }
-//           );
-//         } else {
-//           reject(new Error("Internal server error"));
-//         }
-//       }
-//     );
-//   });
-// };
-
-// exports.deleteTickets = (id) => {
-//   return new Promise((resolve, reject) => {
-//     connection.query("DELETE FROM tickets WHERE id = ?", id, (err, result) => {
-//       if (!err) {
-//         resolve(result);
-//       } else {
-//         reject(new Error("Internal server error"));
-//       }
-//     });
-//   });
-// };
-
-// exports.getMovieTitle = (idMovie) => {
-//   return new Promise((resolve, reject) => {
-//     connection.query(
-//       "SELECT movies.title FROM movies WHERE id = ?",
-//       idMovie,
-//       (err, result) => {
-//         if (!err) {
-//           resolve(result);
-//         } else {
-//           reject(new Error("Internal server error"));
-//         }
-//       }
-//     );
-//   });
-// };
+exports.createSchedule = (data) => {
+  return new Promise((resolve, reject) => {
+    connection.query("INSERT INTO schedule SET ?", data, (err, result) => {
+      if (!err) {
+        connection.query(
+          "SELECT * FROM schedule WHERE id = ?",
+          result.insertId,
+          (err, result) => {
+            if (!err) {
+              resolve(result);
+            } else {
+              reject(new Error("Internal server error"));
+            }
+          }
+        );
+      } else {
+        reject(new Error(err));
+      }
+    });
+  });
+};

@@ -148,6 +148,15 @@ exports.create = async (req, res) => {
     helper.printError(res, 500, err.message);
   }
 
+  try {
+    const moviegoers = await transactionsModel.checkMoviegoers(idUser);
+    if (moviegoers.length > 0) {
+      await transactionsModel.updatePoint(idUser, ticket);
+    }
+  } catch (err) {
+    helper.printError(res, 500, err.message);
+  }
+
   const data = {
     date,
     time,

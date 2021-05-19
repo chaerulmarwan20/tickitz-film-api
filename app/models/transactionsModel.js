@@ -262,3 +262,35 @@ exports.createDetailTransactions = (data) => {
     );
   });
 };
+
+exports.checkMoviegoers = (id) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT moviegoers FROM users WHERE id = ? AND moviegoers = true",
+      id,
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
+      }
+    );
+  });
+};
+
+exports.updatePoint = (id, ticket) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      `UPDATE users set point = point + ${1 * ticket.length} WHERE id = ?`,
+      id,
+      (err, result) => {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(new Error("Internal server error"));
+        }
+      }
+    );
+  });
+};

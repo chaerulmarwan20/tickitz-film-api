@@ -118,9 +118,9 @@ exports.findOne = (req, res) => {
 };
 
 exports.create = async (req, res) => {
-  const { category, price, available, idMovie, idSchedule, idSeat } = req.body;
+  const { category, available, idMovie, idSchedule, idSeat } = req.body;
 
-  if (!category || !price || !available || !idMovie || !idSchedule || !idSeat) {
+  if (!category || !available || !idMovie || !idSchedule || !idSeat) {
     helper.printError(res, 400, "Content cannot be empty");
     return;
   }
@@ -140,7 +140,6 @@ exports.create = async (req, res) => {
   const data = {
     movieTitle: titleMovie,
     category,
-    price,
     available,
     idSchedule,
     idSeat,
