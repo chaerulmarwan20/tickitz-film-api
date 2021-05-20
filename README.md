@@ -38,6 +38,15 @@ The Tickitz application is a web application created using node.js and its frame
 - [Redis](https://redis.io/)
 - [JWT](https://jwt.io/)
 - [Nodemailer](https://nodemailer.com/)
+- [Moment](https://momentjs.com/)
+- [Standard](https://standardjs.com/)
+- [Joi](https://www.npmjs.com/package/joi)
+- [Bcrypt](https://www.npmjs.com/package/bcrypt)
+- [Multer](https://www.npmjs.com/package/multer)
+- [Morgan](https://www.npmjs.com/package/morgan)
+- [Cors](https://www.npmjs.com/package/cors)
+- [Dotenv](https://www.npmjs.com/package/dotenv)
+- [Ip](https://www.npmjs.com/package/ip)
 
 ## Prerequisites
 
@@ -127,6 +136,20 @@ The Tickitz application is a web application created using node.js and its frame
 |  `PUT`   | /v1/payments/:id |
 | `DELETE` | /v1/payments/:id |
 
+- Schedule
+
+|  METHOD  |         API         |
+| :------: | :-----------------: |
+|  `GET`   |    /v1/schedule     |
+|  `GET`   |  /v1/schedule/:id   |
+|  `GET`   |  /v1/schedule/time  |
+|  `GET`   | /v1/schedule/ticket |
+|  `POST`  |    /v1/schedule     |
+|  `POST`  |  /v1/schedule/seat  |
+|  `POST`  | /v1/schedule/ticket |
+|  `PUT`   |  /v1/schedule/:id   |
+| `DELETE` |  /v1/schedule/:id   |
+
 ## Installation
 
 1. Open your terminal or command prompt. Then, clone the repository `git clone https://github.com/chaerulmarwan20/tickitz-film-api.git`
@@ -134,7 +157,7 @@ The Tickitz application is a web application created using node.js and its frame
 3. Go to directory `cd tickitz-film-api`
 4. Install all required packages `npm install`
 5. Create a new file named `.env`, add it's content from `.env.example`
-6. Run server `npm run dev`
+6. Run server `npm run dev` or `npm start`
 
 ## Related Project
 
