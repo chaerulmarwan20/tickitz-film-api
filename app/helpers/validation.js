@@ -63,11 +63,11 @@ module.exports = {
         "array.empty": `Time cannot be an empty field`,
         "any.required": `Time is a required field`,
       }),
-      // realesed: Joi.boolean().required().messages({
-      //   "boolean.base": `Realese must be a true or false`,
-      //   "boolean.empty": `Realese cannot be an empty field`,
-      //   "any.required": `Realese is a required field`,
-      // }),
+      realesed: Joi.boolean().required().messages({
+        "boolean.base": `Realese must be a true or false`,
+        "boolean.empty": `Realese cannot be an empty field`,
+        "any.required": `Realese is a required field`,
+      }),
     });
     return schema.validate(schedule);
   },
@@ -107,6 +107,11 @@ module.exports = {
         "string.base": `Category should be a type of text`,
         "string.empty": `Category cannot be an empty field`,
         "any.required": `Category is a required field`,
+      }),
+      realesed: Joi.boolean().required().messages({
+        "boolean.base": `Realese must be a true or false`,
+        "boolean.empty": `Realese cannot be an empty field`,
+        "any.required": `Realese is a required field`,
       }),
     });
     return schema.validate(movie);

@@ -178,18 +178,20 @@ exports.create = (req, res) => {
   req.body.cinema = JSON.parse(req.body.cinema);
   req.body.time = JSON.parse(req.body.time);
 
-  const formValidate = validation.validationSchedule(req.body);
-
-  if (formValidate.error) {
-    helper.printError(res, 400, formValidate.error.details[0].message);
-    return;
-  }
   let image;
+
   if (!req.file) {
     helper.printError(res, 400, "Image is required");
     return;
   } else {
     image = req.file.path;
+  }
+
+  const formValidate = validation.validationSchedule(req.body);
+
+  if (formValidate.error) {
+    helper.printError(res, 400, formValidate.error.details[0].message);
+    return;
   }
 
   const cinema = req.body.cinema;
@@ -203,7 +205,7 @@ exports.create = (req, res) => {
     cast,
     synopsis,
     category,
-    // realesed,
+    realesed,
     dateRealesed,
     dateSchedule,
     city,
@@ -218,8 +220,7 @@ exports.create = (req, res) => {
     cast,
     synopsis,
     category,
-    // realesed: realesed === true || realesed === "true" ? true : false,
-    realesed: true,
+    realesed: realesed === true || realesed === "true" ? true : false,
     dateRealesed,
   };
 
@@ -288,8 +289,16 @@ exports.update = (req, res) => {
     return;
   }
 
-  const { title, genre, duration, director, cast, synopsis, category } =
-    req.body;
+  const {
+    title,
+    genre,
+    duration,
+    director,
+    cast,
+    synopsis,
+    category,
+    realesed,
+  } = req.body;
 
   if (id.match(checkId) == null) {
     helper.printError(res, 400, "Provide a valid id!");
@@ -304,6 +313,7 @@ exports.update = (req, res) => {
     cast,
     synopsis,
     category,
+    realesed,
   };
 
   moviesModel
