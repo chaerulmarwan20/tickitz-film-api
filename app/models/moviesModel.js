@@ -210,7 +210,7 @@ exports.findMovies = (id, message) => {
         if (result.length == 1) {
           resolve(result);
         } else {
-          reject(new Error(`Cannot ${message} movies with id = ${id}`));
+          reject(new Error(`Cannot ${message} movie with id = ${id}`));
         }
       } else {
         reject(new Error("Internal server error"));

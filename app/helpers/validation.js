@@ -44,14 +44,14 @@ module.exports = {
         "any.required": `Realese date is a required field`,
       }),
       dateSchedule: Joi.date().required().messages({
-        "date.base": `Schedule date must be a valid date`,
-        "date.empty": `Schedule date cannot be an empty field`,
-        "any.required": `Schedule date is a required field`,
+        "date.base": `Showtimes date is a required field`,
+        "date.empty": `Showtimes date cannot be an empty field`,
+        "any.required": `Showtimes date is a required field`,
       }),
       cinema: Joi.array().required().messages({
-        "number.base": `Cinema should be a type of array`,
-        "number.empty": `Cinema cannot be an empty field`,
-        "any.required": `Cinema is a required field`,
+        "number.base": `Premiere should be a type of array`,
+        "number.empty": `Premiere cannot be an empty field`,
+        "any.required": `Premiere is a required field`,
       }),
       city: Joi.number().required().messages({
         "number.base": `City should be a type of number`,
@@ -59,9 +59,9 @@ module.exports = {
         "any.required": `City is a required field`,
       }),
       time: Joi.array().required().messages({
-        "array.base": `Time should be a type of array`,
-        "array.empty": `Time cannot be an empty field`,
-        "any.required": `Time is a required field`,
+        "array.base": `Showtimes should be a type of array`,
+        "array.empty": `Showtimes cannot be an empty field`,
+        "any.required": `Showtimes is a required field`,
       }),
       realesed: Joi.boolean().required().messages({
         "boolean.base": `Realese must be a true or false`,

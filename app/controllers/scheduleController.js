@@ -178,6 +178,14 @@ exports.create = (req, res) => {
   req.body.cinema = JSON.parse(req.body.cinema);
   req.body.time = JSON.parse(req.body.time);
 
+  if (req.body.cinema.length < 1) {
+    helper.printError(res, 400, "Please select a premiere");
+    return;
+  } else if (req.body.time.length < 1) {
+    helper.printError(res, 400, "Please select a time");
+    return;
+  }
+
   let image;
 
   if (!req.file) {
@@ -224,14 +232,12 @@ exports.create = (req, res) => {
     dateRealesed,
   };
 
-  helper.printSuccess(res, 200, "New movies has been created", {});
-
   moviesModel
     .createMovies(data)
     .then(async (result) => {
       const idMovie = result[0].id;
       if (result.affectedRows === 0) {
-        helper.printError(res, 400, "Error creating movies");
+        helper.printError(res, 400, "Error creating movie");
         return;
       }
       const dayNow = moment(dateSchedule).format("dddd");
@@ -249,7 +255,7 @@ exports.create = (req, res) => {
         const scheduleResult = await scheduleModel.createSchedule(dataSchedule);
         idSchedule = scheduleResult[0].id;
         if (scheduleResult.affectedRows === 0) {
-          helper.printError(res, 400, "Error creating movies");
+          helper.printError(res, 400, "Error creating movie");
           return;
         }
         for (let i = 0; i < time.length; i++) {
@@ -265,13 +271,13 @@ exports.create = (req, res) => {
             };
             const ticketResult = await scheduleModel.createTicket(dataTicket);
             if (ticketResult.affectedRows === 0) {
-              helper.printError(res, 400, "Error creating movies");
+              helper.printError(res, 400, "Error creating movie");
               return;
             }
           }
         }
       }
-      helper.printSuccess(res, 200, "New movies has been created", result);
+      helper.printSuccess(res, 200, "New movie has been created", result);
     })
     .catch((err) => {
       helper.printError(res, 500, err.message);
@@ -313,7 +319,7 @@ exports.update = (req, res) => {
     cast,
     synopsis,
     category,
-    realesed,
+    realesed: realesed === true || realesed === "true" ? true : false,
   };
 
   moviesModel
@@ -331,7 +337,7 @@ exports.update = (req, res) => {
       return moviesModel.updateMovies(id, data);
     })
     .then((result) => {
-      helper.printSuccess(res, 200, "Movies has been updated", result);
+      helper.printSuccess(res, 200, "Movie has been updated", result);
     })
     .catch((err) => {
       if (err.message === "Internal server error") {
@@ -358,7 +364,7 @@ exports.delete = (req, res) => {
       return moviesModel.deleteMovies(id);
     })
     .then((result) => {
-      helper.printSuccess(res, 200, "Movies has been deleted", {});
+      helper.printSuccess(res, 200, "Movie has been deleted", {});
     })
     .catch((err) => {
       if (err.message === "Internal server error") {
