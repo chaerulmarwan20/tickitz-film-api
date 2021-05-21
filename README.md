@@ -29,6 +29,8 @@ The Tickitz application is a web application created using node.js and its frame
 
 - Redis server
 
+- Form validation using joi
+
 - CRUD for all tables required in the application
 
 ## Built With
