@@ -11,7 +11,8 @@
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Documentation](#documentation)
-- [Related Project](#related-project)
+- [Link](#link)
+- [Author](#author)
 
 ## Introduction
 
@@ -108,9 +109,13 @@ npm start
 
 ## Documentation
 
-[![run in Postman](https://run.pstmn.io/button.svg)](https://documenter.getpostman.com/view/11970262/TzXtJfm9)
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://documenter.getpostman.com/view/11970262/TzXtJfm9)
 
-## Related Project
+## Link
 
 - :white_check_mark: [`Frontend Tickitz`](https://github.com/chaerulmarwan20/tickitz-film-frontend)
 - :rocket: [`Publication`](https://booking-tickitz-film.netlify.app/)
+
+## Author
+
+- [Chaerul Marwan](https://github.com/chaerulmarwan20)
