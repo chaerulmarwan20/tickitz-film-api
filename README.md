@@ -93,6 +93,9 @@ SECRET_KEY=
 # Email
 EMAIL_USER=
 EMAIL_PASS=
+
+# Redis
+REDIS_PORT=6379
 ```
 
 5. Run application
