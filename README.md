@@ -71,7 +71,7 @@ cd tickitz-film-api
 npm install
 ```
 
-3. Create database named `tickitz-film` and import `tickitz-film.sql` from this repository
+3. Create a new database with a name `tickitz-film` and import `tickitz-film.sql` from this repository
 
 4. Create .env file
 
