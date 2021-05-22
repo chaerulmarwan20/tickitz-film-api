@@ -9,8 +9,8 @@
 - [Features](#features)
 - [Built With](#built-with)
 - [Prerequisites](#prerequisites)
-- [Endpoint](#endpoint)
 - [Installation](#installation)
+- [Documentation](#documentation)
 - [Related Project](#related-project)
 
 ## Introduction
@@ -55,113 +55,62 @@ The Tickitz application is a web application created using node.js and its frame
 - [NodeJs](https://nodejs.org/en/download/)
 - [XAMPP](https://www.apachefriends.org/index.html)
 
-## Endpoint
-
-- User
-
-|  METHOD  |              API               |
-| :------: | :----------------------------: |
-|  `GET`   |           /v1/users            |
-|  `GET`   |       /v1/users/find-one       |
-|  `POST`  |           /v1/users            |
-|  `GET`   |     /v1/users/auth/verify      |
-|  `PUT`   |         /v1/users/:id          |
-|  `PUT`   |      /v1/users/moviegoers      |
-|  `POST`  |      /v1/users/auth/login      |
-|  `POST`  |   /v1/users/auth/check-email   |
-|  `POST`  | /v1/users/auth/forgot-password |
-|  `PUT`   | /v1/users/auth/reset-password  |
-| `DELETE` |         /v1/users/:id          |
-
-- Movie
-
-|  METHOD  |              API               |
-| :------: | :----------------------------: |
-|  `GET`   |           /v1/movies           |
-|  `GET`   |      /v1/movies/realesed       |
-|  `GET`   | /v1/movies/find-movies/by-date |
-|  `GET`   |     /v1/movies/is-realese      |
-|  `GET`   |   /v1/movies/is-not-realese    |
-|  `GET`   |         /v1/movies/:id         |
-|  `POST`  |           /v1/movies           |
-|  `PUT`   |         /v1/movies/:id         |
-| `DELETE` |         /v1/movies/:id         |
-
-- Cinema
-
-|  METHOD  |       API       |
-| :------: | :-------------: |
-|  `GET`   |   /v1/cinemas   |
-|  `GET`   | /v1/cinemas/:id |
-|  `POST`  |   /v1/cinemas   |
-|  `PUT`   | /v1/cinemas/:id |
-| `DELETE` | /v1/cinemas/:id |
-
-- City
-
-|  METHOD  |      API       |
-| :------: | :------------: |
-|  `GET`   |   /v1/cities   |
-|  `GET`   | /v1/cities/:id |
-|  `POST`  |   /v1/cities   |
-|  `PUT`   | /v1/cities/:id |
-| `DELETE` | /v1/cities/:id |
-
-- Ticket
-
-|  METHOD  |       API       |
-| :------: | :-------------: |
-|  `GET`   |   /v1/tickets   |
-|  `GET`   | /v1/tickets/:id |
-|  `POST`  |   /v1/tickets   |
-|  `PUT`   | /v1/tickets/:id |
-| `DELETE` | /v1/tickets/:id |
-
-- Transaction
-
-|  METHOD  |            API             |
-| :------: | :------------------------: |
-|  `GET`   |      /v1/transactions      |
-|  `GET`   |    /v1/transactions/:id    |
-|  `POST`  |      /v1/transactions      |
-|  `PUT`   |    /v1/transactions/:id    |
-| `DELETE` |    /v1/transactions/:id    |
-|  `GET`   | /v1/transactions/users/:id |
-
-- Payment
-
-|  METHOD  |       API        |
-| :------: | :--------------: |
-|  `GET`   |   /v1/payments   |
-|  `GET`   | /v1/payments/:id |
-|  `POST`  |   /v1/payments   |
-|  `PUT`   | /v1/payments/:id |
-| `DELETE` | /v1/payments/:id |
-
-- Schedule
-
-|  METHOD  |         API         |
-| :------: | :-----------------: |
-|  `GET`   |    /v1/schedule     |
-|  `GET`   |  /v1/schedule/:id   |
-|  `GET`   |  /v1/schedule/time  |
-|  `GET`   | /v1/schedule/ticket |
-|  `POST`  |    /v1/schedule     |
-|  `POST`  |  /v1/schedule/seat  |
-|  `POST`  | /v1/schedule/ticket |
-|  `PUT`   |  /v1/schedule/:id   |
-| `DELETE` |  /v1/schedule/:id   |
-
 ## Installation
 
-1. Open your terminal or command prompt. Then, clone the repository `git clone https://github.com/chaerulmarwan20/tickitz-film-api.git`
-2. Create database named `tickitz-film` and import `tickitz-film.sql` from this repository
-3. Go to directory `cd tickitz-film-api`
-4. Install all required packages `npm install`
-5. Create a new file named `.env`, add it's content from `.env.example`
-6. Run server `npm run dev` or `npm start`
+1. Clone the repository
+
+```
+git clone https://github.com/chaerulmarwan20/tickitz-film-api.git
+cd tickitz-film-api
+```
+
+2. Install package
+
+```
+npm install
+```
+
+3. Create database named `tickitz-film` and import `tickitz-film.sql` from this repository
+
+4. Create .env file
+
+```
+# Host & Port
+HOST=
+PORT=
+PORT_FRONTEND=
+
+# Database
+DB_HOST=
+DB_USER=
+DB_PASS=
+DB_NAME=tickitz-film
+
+# Secret Key
+SECRET_KEY=
+
+# Email
+EMAIL_USER=
+EMAIL_PASS=
+```
+
+5. Run application
+
+```
+npm run dev
+```
+
+Or
+
+```
+npm start
+```
+
+## Documentation
+
+[![run in Postman](https://run.pstmn.io/button.svg)](https://documenter.getpostman.com/view/11970262/TzXtJfm9)
 
 ## Related Project
 
 - :white_check_mark: [`Frontend Tickitz`](https://github.com/chaerulmarwan20/tickitz-film-frontend)
-- :rocket: [`Production`](https://booking-tickitz-film.netlify.app/)
+- :rocket: [`Publication`](https://booking-tickitz-film.netlify.app/)
