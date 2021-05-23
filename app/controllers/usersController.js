@@ -125,8 +125,9 @@ exports.create = async (req, res) => {
     email,
     password: await hash.hashPassword(password),
     role: 2,
-    moviegoers: false,
     active: false,
+    moviegoers: false,
+    point: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
