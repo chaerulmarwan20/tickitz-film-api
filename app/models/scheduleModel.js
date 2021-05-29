@@ -144,7 +144,7 @@ exports.createSchedule = (data) => {
           }
         );
       } else {
-        reject(new Error(err));
+        reject(new Error("Internal server error"));
       }
     });
   });

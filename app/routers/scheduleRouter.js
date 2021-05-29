@@ -9,8 +9,12 @@ router
   .get("/time", auth.verification(), scheduleController.findAllTime)
   .get("/ticket", auth.verification(), scheduleController.findAllTicket)
   .get("/:id", auth.verification(), scheduleController.findOne)
-  .post("/seat", auth.verification(), scheduleController.createSeat)
-  .post("/ticket", auth.verification(), scheduleController.createTicket)
+  .post(
+    "/ticket",
+    auth.verification(),
+    auth.isAdmin(),
+    scheduleController.createTicket
+  )
   .post(
     "/",
     auth.verification(),
@@ -31,12 +35,5 @@ router
     auth.isAdmin(),
     scheduleController.delete
   );
-// .put("/:id", auth.verification(), auth.isAdmin(), scheduleController.update)
-// .delete(
-//   "/:id",
-//   auth.verification(),
-//   auth.isAdmin(),
-//   scheduleController.delete
-// );
 
 module.exports = router;

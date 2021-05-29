@@ -144,36 +144,6 @@ exports.findOne = (req, res) => {
     });
 };
 
-exports.createSeat = (req, res) => {
-  const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-
-  arr.forEach((element) => {
-    const data = {
-      row: "G",
-      seat: element,
-    };
-    scheduleModel.createSeat(data);
-  });
-  helper.printSuccess(res, 200, "New seats has been created", {});
-};
-
-exports.createTicket = (req, res) => {
-  for (let i = 1; i <= 98; i++) {
-    const data = {
-      movieTitle: "The Old Guard",
-      category: "PG-13",
-      price: 10,
-      available: true,
-      idSchedule: 1,
-      time: "08:30am",
-      idSeat: i,
-      idMovie: 1,
-    };
-    scheduleModel.createTicket(data);
-  }
-  helper.printSuccess(res, 200, "New tickets has been created", {});
-};
-
 exports.create = (req, res) => {
   req.body.cinema = JSON.parse(req.body.cinema);
   req.body.time = JSON.parse(req.body.time);
@@ -372,6 +342,60 @@ exports.delete = (req, res) => {
       }
       helper.printError(res, 400, err.message);
     });
+};
+
+exports.createTicket = async (req, res) => {
+  const cinema = [1, 2, 3];
+  const time = [
+    "10:00am",
+    "01:00pm",
+    "03:00pm",
+    "05:00pm",
+    "07:00pm",
+    "09:00pm",
+    "11:00pm",
+  ];
+  try {
+    for (let a = 0; a < cinema.length; a++) {
+      const dataSchedule = {
+        day: "Thursday",
+        date: "2021-07-01",
+        price: 30000,
+        time: JSON.stringify(time),
+        idCity: 3,
+        idMovie: 105,
+        idCinema: cinema[a],
+      };
+      let idSchedule;
+      const scheduleResult = await scheduleModel.createSchedule(dataSchedule);
+      idSchedule = scheduleResult[0].id;
+      if (scheduleResult.affectedRows === 0) {
+        helper.printError(res, 400, "Error creating schedule and ticket");
+        return;
+      }
+      for (let i = 0; i < time.length; i++) {
+        for (let j = 1; j <= 98; j++) {
+          const dataTicket = {
+            movieTitle: "No Time To Die",
+            category: "PG-13",
+            available: true,
+            idSchedule,
+            time: time[i],
+            idSeat: j,
+            idMovie: 105,
+          };
+          const ticketResult = await scheduleModel.createTicket(dataTicket);
+          if (ticketResult.affectedRows === 0) {
+            helper.printError(res, 400, "Error creating schedule and ticket");
+            return;
+          }
+        }
+      }
+    }
+    helper.printSuccess(res, 200, "Schedule and ticket has been created", {});
+  } catch (err) {
+    helper.printError(res, 500, err.message);
+  }
 };
 
 const removeImage = (filePath) => {
