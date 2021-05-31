@@ -6,47 +6,14 @@ const redis = require("../middlewares/redis");
 const auth = require("../middlewares/auth");
 
 router
-  .get(
-    "/",
-    auth.verification(),
-    redis.allData("getAllMovies"),
-    moviesController.findAll
-  )
-  .get(
-    "/realesed",
-    redis.allData("getAllMoviesRealesed"),
-    moviesController.findAllRealesed
-  )
-  .get(
-    "/is-realese",
-    redis.allData("isMoviesRealesed"),
-    moviesController.isRealesed
-  )
-  .get(
-    "/is-not-realese",
-    redis.allData("isMoviesNotRealesed"),
-    moviesController.isNotRealesed
-  )
+  .get("/", auth.verification(), redis.allData("getAllMovies"), moviesController.findAll)
+  .get("/realesed", redis.allData("getAllMoviesRealesed"), moviesController.findAllRealesed)
+  .get("/is-realese", redis.allData("isMoviesRealesed"), moviesController.isRealesed)
+  .get("/is-not-realese", redis.allData("isMoviesNotRealesed"), moviesController.isNotRealesed)
   .get("/:id", auth.verification(), moviesController.findOne)
-  .get(
-    "/find-movies/by-date",
-    redis.oneData("getMoviesByDate"),
-    moviesController.findMoviesByDate
-  )
-  .post(
-    "/",
-    auth.verification(),
-    auth.isAdmin(),
-    multer.uploadImage.single("image"),
-    moviesController.create
-  )
-  .put(
-    "/:id",
-    auth.verification(),
-    auth.isAdmin(),
-    multer.uploadImage.single("image"),
-    moviesController.update
-  )
+  .get("/find-movies/by-date", redis.oneData("getMoviesByDate"), moviesController.findMoviesByDate)
+  .post("/", auth.verification(), auth.isAdmin(), multer.uploadImage.single("image"), moviesController.create)
+  .put("/:id", auth.verification(), auth.isAdmin(), multer.uploadImage.single("image"), moviesController.update)
   .delete("/:id", auth.verification(), auth.isAdmin(), moviesController.delete);
 
 module.exports = router;

@@ -60,7 +60,7 @@ app.use((err, req, res, next) => {
 
 app.listen(port, () => {
   console.log(`Server is running on http://${host}:${port}`);
-  cron.schedule("0 3 * * *", () => {
+  cron.schedule("30 0 * * *", () => {
     const dataMovie = [
       {
         id: 86,
@@ -90,16 +90,11 @@ app.listen(port, () => {
     ];
     const cinema = [1, 2, 3];
     const city = [1, 2, 3];
-    const time = [
-      "10:00am",
-      "01:00pm",
-      "03:00pm",
-      "05:00pm",
-      "07:00pm",
-      "09:00pm",
-      "11:00pm",
-    ];
+    const time = ["10:00am", "01:00pm", "03:00pm", "05:00pm", "07:00pm", "09:00pm", "11:00pm"];
     dataMovie.map(async (item, index) => {
+      const idMovie = item.id;
+      const title = item.title;
+      const category = item.category;
       for (let c = 0; c < city.length; c++) {
         for (let a = 0; a < cinema.length; a++) {
           const date = new Date();
@@ -110,24 +105,22 @@ app.listen(port, () => {
             price: 30000,
             time: JSON.stringify(time),
             idCity: city[c],
-            idMovie: item.id,
+            idMovie,
             idCinema: cinema[a],
           };
           let idSchedule;
-          const scheduleResult = await scheduleModel.createSchedule(
-            dataSchedule
-          );
+          const scheduleResult = await scheduleModel.createSchedule(dataSchedule);
           idSchedule = scheduleResult[0].id;
           for (let i = 0; i < time.length; i++) {
             for (let j = 1; j <= 98; j++) {
               const dataTicket = {
-                movieTitle: item.title,
-                category: item.category,
+                movieTitle: title,
+                category,
                 available: true,
                 idSchedule,
                 time: time[i],
                 idSeat: j,
-                idMovie: item.id,
+                idMovie,
               };
               await scheduleModel.createTicket(dataTicket);
             }
