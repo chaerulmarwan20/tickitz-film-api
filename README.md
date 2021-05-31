@@ -53,7 +53,7 @@ The Tickitz application is a web application created using node.js and its frame
 
 ## Prerequisites
 
-- [NodeJs](https://nodejs.org/en/download/)
+- [NodeJs](https://nodejs.org/)
 - [MySQL](https://www.mysql.com/)
 
 ## Installation
