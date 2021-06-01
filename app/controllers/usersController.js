@@ -193,12 +193,13 @@ exports.verify = async (req, res) => {
           jwt.verify(token, secretKey, async (err, decoded) => {
             if (err) {
               if (err.name === "JsonWebTokenError") {
+                await usersModel.deleteToken(email);
                 helper.printError(res, 401, "Invalid signature");
               } else if (err.name === "TokenExpiredError") {
                 await usersModel.deleteEmail(email);
-                await usersModel.deleteToken(email);
                 helper.printError(res, 401, "Token is expired");
               } else {
+                await usersModel.deleteEmail(email);
                 helper.printError(res, 401, "Token is not active");
               }
             } else {
@@ -402,7 +403,11 @@ exports.forgotPassword = (req, res) => {
     .findAccount(data)
     .then((result) => {
       if (result.length < 1) {
-        helper.printError(res, 400, "Email is not registered or activated!");
+        helper.printError(
+          res,
+          400,
+          "Email is not registered or not activated!"
+        );
         return;
       }
       delete result[0].password;
@@ -456,16 +461,19 @@ exports.resetPassword = async (req, res) => {
           jwt.verify(token, secretKey, async (err, decoded) => {
             if (err) {
               if (err.name === "JsonWebTokenError") {
+                await usersModel.deleteToken(email);
                 helper.printError(res, 401, "Invalid signature");
               } else if (err.name === "TokenExpiredError") {
                 await usersModel.deleteToken(email);
                 helper.printError(res, 401, "Token is expired");
               } else {
+                await usersModel.deleteToken(email);
                 helper.printError(res, 401, "Token is not active");
               }
             } else {
               const data = await hash.hashPassword(password);
               await usersModel.setPassword(data, email);
+              await usersModel.deleteToken(email);
               if (!data) {
                 helper.printError(res, 400, "Content cannot be empty");
                 return;

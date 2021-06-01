@@ -209,7 +209,7 @@ exports.login = (data) => {
           if (result.length === 1) {
             const user = result[0];
             if (result[0].active === 0) {
-              reject(new Error("Your account not activated"));
+              reject(new Error("Your email is not activated!"));
             } else {
               bcrypt.compare(
                 data.password,
@@ -221,14 +221,14 @@ exports.login = (data) => {
                     if (result) {
                       resolve(user);
                     } else {
-                      reject(new Error("Wrong password"));
+                      reject(new Error("Wrong password!"));
                     }
                   }
                 }
               );
             }
           } else {
-            reject(new Error("Wrong email"));
+            reject(new Error("Wrong email!"));
           }
         }
       }
