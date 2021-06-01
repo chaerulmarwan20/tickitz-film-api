@@ -60,74 +60,91 @@ app.use((err, req, res, next) => {
 
 app.listen(port, () => {
   console.log(`Server is running on http://${host}:${port}`);
-  cron.schedule("30 0 * * *", () => {
-    const dataMovie = [
-      {
-        id: 86,
-        title: "1917",
-        category: "13+",
-      },
-      {
-        id: 88,
-        title: "Bad Boys For Life",
-        category: "R",
-      },
-      {
-        id: 90,
-        title: "Extraction",
-        category: "R",
-      },
-      {
-        id: 91,
-        title: "Ford v Ferrari",
-        category: "13+",
-      },
-      {
-        id: 92,
-        title: "Godzilla vs. Kong",
-        category: "PG-13",
-      },
-    ];
-    const cinema = [1, 2, 3];
-    const city = [1, 2, 3];
-    const time = ["10:00am", "01:00pm", "03:00pm", "05:00pm", "07:00pm", "09:00pm", "11:00pm"];
-    dataMovie.map(async (item, index) => {
-      const idMovie = item.id;
-      const title = item.title;
-      const category = item.category;
-      for (let c = 0; c < city.length; c++) {
-        for (let a = 0; a < cinema.length; a++) {
-          const date = new Date();
-          const dayNow = moment(date).format("dddd");
-          const dataSchedule = {
-            day: dayNow,
-            date,
-            price: 30000,
-            time: JSON.stringify(time),
-            idCity: city[c],
-            idMovie,
-            idCinema: cinema[a],
-          };
-          let idSchedule;
-          const scheduleResult = await scheduleModel.createSchedule(dataSchedule);
-          idSchedule = scheduleResult[0].id;
-          for (let i = 0; i < time.length; i++) {
-            for (let j = 1; j <= 98; j++) {
-              const dataTicket = {
-                movieTitle: title,
-                category,
-                available: true,
-                idSchedule,
-                time: time[i],
-                idSeat: j,
-                idMovie,
-              };
-              await scheduleModel.createTicket(dataTicket);
+  cron.schedule(
+    "30 0 * * *",
+    () => {
+      const dataMovie = [
+        {
+          id: 86,
+          title: "1917",
+          category: "13+",
+        },
+        {
+          id: 88,
+          title: "Bad Boys For Life",
+          category: "R",
+        },
+        {
+          id: 90,
+          title: "Extraction",
+          category: "R",
+        },
+        {
+          id: 91,
+          title: "Ford v Ferrari",
+          category: "13+",
+        },
+        {
+          id: 92,
+          title: "Godzilla vs. Kong",
+          category: "PG-13",
+        },
+      ];
+      const cinema = [1, 2, 3];
+      const city = [1, 2, 3];
+      const time = [
+        "10:00am",
+        "01:00pm",
+        "03:00pm",
+        "05:00pm",
+        "07:00pm",
+        "09:00pm",
+        "11:00pm",
+      ];
+      dataMovie.map(async (item, index) => {
+        const idMovie = item.id;
+        const title = item.title;
+        const category = item.category;
+        for (let c = 0; c < city.length; c++) {
+          for (let a = 0; a < cinema.length; a++) {
+            const date = new Date();
+            const dayNow = moment(date).format("dddd");
+            const dataSchedule = {
+              day: dayNow,
+              date,
+              price: 30000,
+              time: JSON.stringify(time),
+              idCity: city[c],
+              idMovie,
+              idCinema: cinema[a],
+            };
+            let idSchedule;
+            const scheduleResult = await scheduleModel.createSchedule(
+              dataSchedule
+            );
+            idSchedule = scheduleResult[0].id;
+            for (let i = 0; i < time.length; i++) {
+              for (let j = 1; j <= 98; j++) {
+                const dataTicket = {
+                  movieTitle: title,
+                  category,
+                  available: true,
+                  idSchedule,
+                  time: time[i],
+                  idSeat: j,
+                  idMovie,
+                };
+                await scheduleModel.createTicket(dataTicket);
+              }
             }
           }
         }
-      }
-      console.log(`${index} Schedule and ticket has been created`);
-    });
-  });
+        console.log(`${index} Schedule and ticket has been created`);
+      });
+    },
+    {
+      scheduled: true,
+      timezone: "Asia/Jakarta",
+    }
+  );
 });
