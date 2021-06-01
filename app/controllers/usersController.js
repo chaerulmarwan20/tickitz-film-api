@@ -371,12 +371,8 @@ exports.checkEmail = (req, res) => {
   const data = email;
 
   usersModel
-    .findEmail(data)
+    .checkEmail(data)
     .then((result) => {
-      if (result.length < 1) {
-        helper.printError(res, 400, "Email is not registered!");
-        return;
-      }
       helper.printSuccess(
         res,
         200,

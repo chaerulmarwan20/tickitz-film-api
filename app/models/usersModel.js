@@ -419,3 +419,27 @@ exports.checkAccount = (id, email) => {
     );
   });
 };
+
+exports.checkEmail = (email) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT * FROM users WHERE email = ?",
+      email,
+      (err, result) => {
+        if (err) {
+          reject(new Error("Internal server error"));
+        } else {
+          if (result.length === 1) {
+            if (result[0].active === 0) {
+              reject(new Error("Email is not activated!"));
+            } else {
+              resolve(result);
+            }
+          } else {
+            reject(new Error("Email is not registered!"));
+          }
+        }
+      }
+    );
+  });
+};
