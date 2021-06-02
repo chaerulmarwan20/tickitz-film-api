@@ -13,7 +13,7 @@ exports.getAllSchedule = (
 ) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT COUNT(*) AS totalData FROM schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id INNER JOIN movies ON schedule.idMovie = movies.id WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ? AND movies.realesed = true",
+      "SELECT COUNT(*) AS totalData FROM schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id INNER JOIN movies ON schedule.idMovie = movies.id WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ?",
       [idMovie, idCity, date],
       (err, result) => {
         let totalData, page, perPage, totalPage, previousPage, nextPage;
@@ -38,7 +38,7 @@ exports.getAllSchedule = (
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT schedule.id, schedule.day, schedule.date, schedule.price, schedule.time, cinemas.image, cinemas.address, cinemas.name FROM schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id INNER JOIN movies ON schedule.idMovie = movies.id WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ? AND movies.realesed = true ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          `SELECT schedule.id, schedule.day, schedule.date, schedule.price, schedule.time, cinemas.image, cinemas.address, cinemas.name FROM schedule INNER JOIN cinemas ON schedule.idCinema = cinemas.id INNER JOIN movies ON schedule.idMovie = movies.id WHERE schedule.idMovie = ? AND schedule.idCity = ? AND schedule.date = ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
           [idMovie, idCity, date, firstData, perPage],
           (err, result) => {
             if (err) {
