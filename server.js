@@ -61,7 +61,7 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
   console.log(`Server is running on http://${host}:${port}`);
   cron.schedule(
-    "10 12 * * *",
+    "30 0 * * *",
     () => {
       const dataMovie = [
         {
@@ -107,11 +107,13 @@ app.listen(port, () => {
         const category = item.category;
         for (let c = 0; c < city.length; c++) {
           for (let a = 0; a < cinema.length; a++) {
-            const date = new Date();
-            const dayNow = moment(date).format("dddd");
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dayNow = moment(tomorrow).format("dddd");
             const dataSchedule = {
               day: dayNow,
-              date,
+              date: tomorrow,
               price: 30000,
               time: JSON.stringify(time),
               idCity: city[c],
