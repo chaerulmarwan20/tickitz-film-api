@@ -5,8 +5,8 @@ const helper = require("../helpers/linkPaginate");
 exports.getAllUsers = (queryPage, queryPerPage, keyword, sortBy, order) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "SELECT COUNT(*) AS totalData FROM users WHERE fullName LIKE ? OR username LIKE ? OR email LIKE ?",
-      [`%${keyword}%`, `%${keyword}%`, `%${keyword}%`],
+      "SELECT COUNT(*) AS totalData FROM users WHERE fullName LIKE ? OR email LIKE ?",
+      [`%${keyword}%`, `%${keyword}%`],
       (err, result) => {
         let totalData, page, perPage, totalPage, previousPage, nextPage;
         if (err) {
@@ -30,8 +30,8 @@ exports.getAllUsers = (queryPage, queryPerPage, keyword, sortBy, order) => {
         }
         const firstData = perPage * page - perPage;
         connection.query(
-          `SELECT * FROM users WHERE fullName LIKE ? OR username LIKE ? OR email LIKE ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
-          [`%${keyword}%`, `%${keyword}%`, `%${keyword}%`, firstData, perPage],
+          `SELECT * FROM users WHERE fullName LIKE ? OR email LIKE ? ORDER BY ${sortBy} ${order} LIMIT ?, ?`,
+          [`%${keyword}%`, `%${keyword}%`, firstData, perPage],
           (err, result) => {
             if (err) {
               reject(new Error("Internal server error"));

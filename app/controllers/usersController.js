@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const ip = require("ip");
 const path = require("path");
 const fs = require("fs");
 const redis = require("redis");
@@ -9,6 +8,7 @@ const usersModel = require("../models/usersModel");
 const helper = require("../helpers/printHelper");
 const mail = require("../helpers/sendEmail");
 const hash = require("../helpers/hashPassword");
+const auth = require("../helpers/auth");
 const secretKey = process.env.SECRET_KEY;
 
 exports.findAll = (req, res) => {
@@ -327,7 +327,7 @@ exports.login = (req, res) => {
 
   usersModel
     .login(data)
-    .then((result) => {
+    .then(async (result) => {
       delete result.password;
       delete result.createdAt;
       delete result.updatedAt;
@@ -340,16 +340,15 @@ exports.login = (req, res) => {
         phoneNumber: result.phoneNumber,
         role: result.role,
       };
-      jwt.sign(payload, secretKey, { expiresIn: "24h" }, async (err, token) => {
+      try {
+        const token = await auth.generateToken(payload);
+        const refreshToken = await auth.generateRefreshToken(payload);
         result.token = token;
-        const data = {
-          idUser: result.id,
-          accessToken: token,
-          ipAddress: ip.address(),
-        };
-        await usersModel.createToken(data);
+        result.refreshToken = refreshToken;
         helper.printSuccess(res, 200, "Login successfully", result);
-      });
+      } catch (err) {
+        helper.printError(res, 401, err.message);
+      }
     })
     .catch((err) => {
       if (err.message === "Wrong email" || err.message === "Wrong password") {
@@ -539,6 +538,30 @@ exports.moviegoers = async (req, res) => {
     .catch((err) => {
       helper.printError(res, 500, err.message);
     });
+};
+
+exports.refreshToken = async (req, res) => {
+  const tokenRefresh = req.body.refreshToken;
+
+  try {
+    const decodedRefresh = await auth.verifyRefreshToken(tokenRefresh);
+    const tokenData = {
+      id: decodedRefresh.id,
+      email: decodedRefresh.email,
+      firstName: decodedRefresh.firstName,
+      lastName: decodedRefresh.lastName,
+      fullName: decodedRefresh.fullName,
+      phoneNumber: decodedRefresh.phoneNumber,
+      role: decodedRefresh.role,
+    };
+    const token = await auth.generateToken(tokenData);
+    const refreshToken = await auth.generateRefreshToken(tokenData);
+    tokenData.token = token;
+    tokenData.refreshToken = refreshToken;
+    helper.printSuccess(res, 200, "Refresh token successfully", tokenData);
+  } catch (err) {
+    helper.printError(res, 401, err.message);
+  }
 };
 
 const removeImage = (filePath) => {
