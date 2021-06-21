@@ -109,7 +109,7 @@ app.listen(port, () => {
           for (let a = 0; a < cinema.length; a++) {
             const today = new Date();
             const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setDate(tomorrow.getDate());
             const dayNow = moment(tomorrow).format("dddd");
             const dataSchedule = {
               day: dayNow,
